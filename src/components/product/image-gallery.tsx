@@ -19,8 +19,8 @@ interface ImageGalleryProps {
   images: Array<{ url: string; alt: string }>
   productName: string
   variations?: Variation[]
-  onVariationImageIndex?: (index: number | null) => void
-  externalSelectedIndex?: number | null
+  onVariationChange?: (variationId: string | null) => void
+  selectedVariationId?: string | null
 }
 
 export function optimizeImageUrl(url: string, width: number, height: number): string {
@@ -55,7 +55,7 @@ function getColorHex(colorName: string): string {
   return colors[normalized] || "#d1d5db"
 }
 
-export function ImageGallery({ images, productName, variations, onVariationImageIndex, externalSelectedIndex }: ImageGalleryProps) {
+export function ImageGallery({ images, productName, variations, onVariationChange, selectedVariationId }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0)
@@ -72,13 +72,6 @@ export function ImageGallery({ images, productName, variations, onVariationImage
     setIsZoomed(false)
     setFailedImages(new Set())
   }, [images])
-
-  // Sync external selection (from variation pill click) into internal state
-  useEffect(() => {
-    if (externalSelectedIndex !== null && externalSelectedIndex !== undefined) {
-      setSelectedIndex(externalSelectedIndex)
-    }
-  }, [externalSelectedIndex])
 
   // 1. Filter out youtube links
   // 2. Deduplicate by URL and Tray sequence ID to prevent low-res duplicates (KEEP FIRST OCCURRENCE)
@@ -104,16 +97,25 @@ export function ImageGallery({ images, productName, variations, onVariationImage
   const varWithImages = (variations || []).filter((v) => v.image)
   const varImageStartIndex = validImages.length
 
+  // Sync external variation selection into internal index
+  useEffect(() => {
+    if (!selectedVariationId) return
+    const varIdx = varWithImages.findIndex((v) => v.id === selectedVariationId)
+    if (varIdx >= 0) {
+      setSelectedIndex(varImageStartIndex + varIdx)
+    }
+  }, [selectedVariationId])
+
   // Notify parent when selection lands on a variation image
   useEffect(() => {
-    if (!onVariationImageIndex) return
+    if (!onVariationChange) return
     const varIdx = selectedIndex - varImageStartIndex
     if (varIdx >= 0 && varIdx < varWithImages.length) {
-      onVariationImageIndex(selectedIndex)
+      onVariationChange(varWithImages[varIdx].id)
     } else {
-      onVariationImageIndex(null)
+      onVariationChange(null)
     }
-  }, [selectedIndex, onVariationImageIndex])
+  }, [selectedIndex, onVariationChange])
 
   const maxThumbScroll = Math.max(
     0,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState } from "react"
 import { ImageGallery } from "@/components/product/image-gallery"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, Ruler } from "lucide-react"
@@ -46,22 +46,8 @@ function getColorHex(colorName: string): string {
 }
 
 export function ProductDetailClient({ product }: { product: ProductData }) {
-  const [activeVariationImageIndex, setActiveVariationImageIndex] = useState<number | null>(null)
+  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null)
   const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para: ${product.title}${product.reference ? ` (Ref: ${product.reference})` : ""}`
-
-  const varWithImages = product.variations.filter((v) => v.image)
-  const productImagesCount = product.images.length
-  const varImageStartIndex = productImagesCount
-
-  const handleVariationClick = useCallback(
-    (v: Variation) => {
-      const varIdx = varWithImages.indexOf(v)
-      if (varIdx >= 0) {
-        setActiveVariationImageIndex(varImageStartIndex + varIdx)
-      }
-    },
-    [varWithImages, varImageStartIndex]
-  )
 
   return (
     <>
@@ -70,8 +56,8 @@ export function ProductDetailClient({ product }: { product: ProductData }) {
           images={product.images}
           productName={product.title}
           variations={product.variations}
-          onVariationImageIndex={setActiveVariationImageIndex}
-          externalSelectedIndex={activeVariationImageIndex}
+          onVariationChange={setSelectedVariationId}
+          selectedVariationId={selectedVariationId}
         />
 
         <div className="space-y-4">
@@ -117,11 +103,11 @@ export function ProductDetailClient({ product }: { product: ProductData }) {
               </h2>
               <div className="flex flex-wrap gap-1">
                 {product.variations.map((v) => {
-                  const isActive = varWithImages.includes(v) && activeVariationImageIndex !== null
+                  const isActive = selectedVariationId === v.id
                   return (
                     <button
                       key={v.id}
-                      onClick={() => handleVariationClick(v)}
+                      onClick={() => setSelectedVariationId(v.id)}
                       className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[11px] font-medium transition-all ${
                         isActive
                           ? "bg-primary/10 border-primary"
