@@ -71,6 +71,7 @@ export function ProductDetailClient({ product }: { product: ProductData }) {
           productName={product.title}
           variations={product.variations}
           onVariationImageIndex={setActiveVariationImageIndex}
+          externalSelectedIndex={activeVariationImageIndex}
         />
 
         <div className="space-y-4">

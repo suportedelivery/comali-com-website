@@ -20,6 +20,7 @@ interface ImageGalleryProps {
   productName: string
   variations?: Variation[]
   onVariationImageIndex?: (index: number | null) => void
+  externalSelectedIndex?: number | null
 }
 
 export function optimizeImageUrl(url: string, width: number, height: number): string {
@@ -54,7 +55,7 @@ function getColorHex(colorName: string): string {
   return colors[normalized] || "#d1d5db"
 }
 
-export function ImageGallery({ images, productName, variations, onVariationImageIndex }: ImageGalleryProps) {
+export function ImageGallery({ images, productName, variations, onVariationImageIndex, externalSelectedIndex }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0)
@@ -72,15 +73,12 @@ export function ImageGallery({ images, productName, variations, onVariationImage
     setFailedImages(new Set())
   }, [images])
 
+  // Sync external selection (from variation pill click) into internal state
   useEffect(() => {
-    if (!onVariationImageIndex) return
-    const varIdx = selectedIndex - varImageStartIndex
-    if (varIdx >= 0 && varIdx < varWithImages.length) {
-      onVariationImageIndex(selectedIndex)
-    } else {
-      onVariationImageIndex(null)
+    if (externalSelectedIndex !== null && externalSelectedIndex !== undefined) {
+      setSelectedIndex(externalSelectedIndex)
     }
-  }, [selectedIndex])
+  }, [externalSelectedIndex])
 
   // 1. Filter out youtube links
   // 2. Deduplicate by URL and Tray sequence ID to prevent low-res duplicates (KEEP FIRST OCCURRENCE)
@@ -105,6 +103,17 @@ export function ImageGallery({ images, productName, variations, onVariationImage
   // Build variation images map
   const varWithImages = (variations || []).filter((v) => v.image)
   const varImageStartIndex = validImages.length
+
+  // Notify parent when selection lands on a variation image
+  useEffect(() => {
+    if (!onVariationImageIndex) return
+    const varIdx = selectedIndex - varImageStartIndex
+    if (varIdx >= 0 && varIdx < varWithImages.length) {
+      onVariationImageIndex(selectedIndex)
+    } else {
+      onVariationImageIndex(null)
+    }
+  }, [selectedIndex, onVariationImageIndex])
 
   const maxThumbScroll = Math.max(
     0,
