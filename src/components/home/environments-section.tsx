@@ -4,28 +4,28 @@ import { ArrowRight } from "lucide-react"
 
 const environments = [
   {
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
+    image: "https://images.unsplash.com/photo-1581339284810-f970b10ccda4?w=800&h=600&fit=crop",
     title: "Banheiros Corporativos",
     description: "Dispensers e acessórios para banheiros profissionais",
     href: "/produtos/dispensers",
   },
   {
-    image: "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800&h=600&fit=crop",
-    title: "Escritórios Modernos",
-    description: "Lixeiras e contentores que combinam com seu espaço",
-    href: "/produtos/lixeiras-e-contentores",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=600&fit=crop",
-    title: "Equipes de Limpeza",
-    description: "Equipamentos completos para manutenção profissional",
+    image: "https://plus.unsplash.com/premium_photo-1663047397245-2ddad26c5dd7?w=800&h=600&fit=crop",
+    title: "Ambientes Corporativos",
+    description: "Carrinhos e baldes de limpeza profissionais",
     href: "/produtos/equipamentos-de-limpeza",
   },
   {
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
-    title: "Ambientes Corporativos",
-    description: "Soluções completas para sua empresa",
-    href: "/produtos",
+    image: "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=800&h=600&fit=crop",
+    title: "Hospitais e Hotéis",
+    description: "Carrinhos e equipamentos para limpeza profissional",
+    href: "/produtos/equipamentos-de-limpeza",
+  },
+  {
+    image: "https://plus.unsplash.com/premium_photo-1681487702577-9c13a36d5b98?w=800&h=600&fit=crop",
+    title: "Escolas, Shoppings, Indústrias",
+    description: "Coleta seletiva para um mundo melhor",
+    href: "/produtos/lixeiras-e-contentores",
   },
 ]
 
