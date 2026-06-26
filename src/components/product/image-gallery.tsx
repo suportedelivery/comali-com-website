@@ -19,6 +19,7 @@ interface ImageGalleryProps {
   images: Array<{ url: string; alt: string }>
   productName: string
   variations?: Variation[]
+  onVariationImageIndex?: (index: number | null) => void
 }
 
 export function optimizeImageUrl(url: string, width: number, height: number): string {
@@ -53,7 +54,7 @@ function getColorHex(colorName: string): string {
   return colors[normalized] || "#d1d5db"
 }
 
-export function ImageGallery({ images, productName, variations }: ImageGalleryProps) {
+export function ImageGallery({ images, productName, variations, onVariationImageIndex }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0)
@@ -70,6 +71,16 @@ export function ImageGallery({ images, productName, variations }: ImageGalleryPr
     setIsZoomed(false)
     setFailedImages(new Set())
   }, [images])
+
+  useEffect(() => {
+    if (!onVariationImageIndex) return
+    const varIdx = selectedIndex - varImageStartIndex
+    if (varIdx >= 0 && varIdx < varWithImages.length) {
+      onVariationImageIndex(selectedIndex)
+    } else {
+      onVariationImageIndex(null)
+    }
+  }, [selectedIndex])
 
   // 1. Filter out youtube links
   // 2. Deduplicate by URL and Tray sequence ID to prevent low-res duplicates (KEEP FIRST OCCURRENCE)
@@ -271,44 +282,6 @@ export function ImageGallery({ images, productName, variations }: ImageGalleryPr
         )}
       </div>
 
-      {variations && variations.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {variations.map((v) => {
-            const varImageIndex = varWithImages.indexOf(v)
-            const imageIndex = varImageIndex >= 0 ? varImageStartIndex + varImageIndex : -1
-            const isActive = imageIndex === selectedIndex
-            return (
-              <button
-                key={v.id}
-                onClick={() => {
-                  if (imageIndex >= 0) {
-                    setSelectedIndex(imageIndex)
-                    setIsZoomed(false)
-                  }
-                }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
-                  isActive
-                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                    : imageIndex >= 0
-                    ? "border-gray-300 bg-white hover:border-primary/50 cursor-pointer"
-                    : "border-gray-200 bg-gray-50 text-gray-500 cursor-default"
-                }`}
-              >
-                {v.type === "Cor" && (
-                  <div
-                    className="w-3 h-3 rounded-full border border-gray-300 shrink-0"
-                    style={{ backgroundColor: getColorHex(v.value) }}
-                  />
-                )}
-                <span>{v.value}</span>
-                {v.sku && (
-                  <span className="text-[10px] text-gray-400 font-mono">({v.sku})</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      )}
     </>
   )
 }
