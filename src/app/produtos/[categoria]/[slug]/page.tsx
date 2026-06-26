@@ -21,26 +21,6 @@ interface ProductPageProps {
   params: Promise<{ categoria: string; slug: string }>
 }
 
-function getColorHex(colorName: string): string {
-  const colors: Record<string, string> = {
-    azul: "#1e40af",
-    marrom: "#78350f",
-    amarela: "#facc15",
-    amarelo: "#facc15",
-    branca: "#f9fafb",
-    branco: "#f9fafb",
-    laranja: "#f97316",
-    vermelha: "#dc2626",
-    vermelho: "#dc2626",
-    cinza: "#6b7280",
-    verde: "#15803d",
-    "verde escuro": "#166534",
-    "verde-escuro": "#166534",
-  }
-  const normalized = colorName.toLowerCase().trim()
-  return colors[normalized] || "#d1d5db"
-}
-
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params
   const product = getProductBySlug(slug)
@@ -95,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Breadcrumb>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <ImageGallery images={product.images} productName={product.title} />
+        <ImageGallery images={product.images} productName={product.title} variations={product.variations} />
 
         <div className="space-y-4">
           <div className="space-y-1">
@@ -133,37 +113,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           )}
 
-          {product.hasVariations && (
-            <div className="space-y-1.5">
-              <h2 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                Variações Disponíveis
-              </h2>
-              <div className="flex flex-wrap gap-1">
-                {product.variations.map((variation) => (
-                  <div
-                    key={variation.id}
-                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 bg-white text-[11px] font-medium text-gray-700 shadow-sm"
-                  >
-                    <div
-                      className="w-2.5 h-2.5 rounded-full border border-gray-300 shrink-0"
-                      style={{
-                        backgroundColor: getColorHex(variation.value),
-                      }}
-                      aria-label={`Cor ${variation.value}`}
-                    />
-                    <span>
-                      {variation.value}
-                      {variation.sku && (
-                        <span className="text-gray-400 font-mono text-[9px] ml-1">
-                          ({variation.sku})
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
 

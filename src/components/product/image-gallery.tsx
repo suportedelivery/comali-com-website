@@ -4,9 +4,21 @@ import { useState, useRef, useEffect } from "react"
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+interface Variation {
+  id: string
+  type: string
+  value: string
+  sku: string
+  price: number | null
+  stock: number
+  image: string | null
+  availability: string | null
+}
+
 interface ImageGalleryProps {
   images: Array<{ url: string; alt: string }>
   productName: string
+  variations?: Variation[]
 }
 
 export function optimizeImageUrl(url: string, width: number, height: number): string {
@@ -21,7 +33,27 @@ const THUMB_HEIGHT = 80
 const THUMB_GAP = 8
 const VISIBLE_THUMBS = 5
 
-export function ImageGallery({ images, productName }: ImageGalleryProps) {
+function getColorHex(colorName: string): string {
+  const colors: Record<string, string> = {
+    azul: "#1e40af",
+    marrom: "#78350f",
+    amarela: "#facc15",
+    amarelo: "#facc15",
+    branca: "#f9fafb",
+    branco: "#f9fafb",
+    laranja: "#f97316",
+    vermelha: "#dc2626",
+    vermelho: "#dc2626",
+    cinza: "#6b7280",
+    verde: "#15803d",
+    "verde escuro": "#166534",
+    "verde-escuro": "#166534",
+  }
+  const normalized = colorName.toLowerCase().trim()
+  return colors[normalized] || "#d1d5db"
+}
+
+export function ImageGallery({ images, productName, variations }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0)
@@ -59,20 +91,32 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
     }
   }
 
-  const maxThumbScroll = Math.max(0, validImages.length - VISIBLE_THUMBS)
+  // Build variation images map
+  const varWithImages = (variations || []).filter((v) => v.image)
+  const varImageStartIndex = validImages.length
 
-  const mainImage = validImages[selectedIndex] || validImages[0]
+  const maxThumbScroll = Math.max(
+    0,
+    validImages.length + varWithImages.length - VISIBLE_THUMBS
+  )
+
+  const mainImage = validImages[selectedIndex] ||
+    (selectedIndex >= varImageStartIndex && varWithImages[selectedIndex - varImageStartIndex]
+      ? { url: varWithImages[selectedIndex - varImageStartIndex].image!, alt: `${productName} - ${varWithImages[selectedIndex - varImageStartIndex].value}` }
+      : validImages[0])
   const optimizedMainUrl = mainImage ? optimizeImageUrl(mainImage.url, 600, 600) : null
 
   const handlePrevious = () => {
-    const newIndex = selectedIndex === 0 ? validImages.length - 1 : selectedIndex - 1
+    const total = validImages.length + varWithImages.length
+    const newIndex = selectedIndex === 0 ? total - 1 : selectedIndex - 1
     setSelectedIndex(newIndex)
     setIsZoomed(false)
     ensureThumbVisible(newIndex)
   }
 
   const handleNext = () => {
-    const newIndex = selectedIndex === validImages.length - 1 ? 0 : selectedIndex + 1
+    const total = validImages.length + varWithImages.length
+    const newIndex = selectedIndex === total - 1 ? 0 : selectedIndex + 1
     setSelectedIndex(newIndex)
     setIsZoomed(false)
     ensureThumbVisible(newIndex)
@@ -94,128 +138,177 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
     setThumbScrollIndex((prev) => Math.min(maxThumbScroll, prev + 1))
   }
 
-  const visibleThumbs = validImages.slice(thumbScrollIndex, thumbScrollIndex + VISIBLE_THUMBS)
+  const allImages = [
+    ...validImages,
+    ...varWithImages.map((v) => ({
+      url: v.image!,
+      alt: `${productName} - ${v.value}`,
+    })),
+  ]
+
+  const visibleThumbs = allImages.slice(thumbScrollIndex, thumbScrollIndex + VISIBLE_THUMBS)
 
   return (
-    <div className="flex gap-4">
-      <div className="relative flex-1 h-full min-h-[300px] max-h-[450px] overflow-hidden rounded-lg border bg-muted">
-        {optimizedMainUrl ? (
-          <button
-            onClick={() => setIsZoomed(!isZoomed)}
-            className={`relative h-full w-full transition-all duration-300 ${
-              isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
-            }`}
-          >
-            <img
-              src={optimizedMainUrl}
-              alt={mainImage.alt}
-              onError={() => handleImageError(mainImage.url)}
-              className={`h-full w-full object-contain transition-transform duration-300 ${
-                isZoomed ? "scale-150" : "scale-100"
+    <>
+      <div className="flex gap-4">
+        <div className="relative flex-1 h-full min-h-[300px] max-h-[450px] overflow-hidden rounded-lg border bg-muted">
+          {optimizedMainUrl ? (
+            <button
+              onClick={() => setIsZoomed(!isZoomed)}
+              className={`relative h-full w-full transition-all duration-300 ${
+                isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
               }`}
-            />
-          </button>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            Sem imagem
-          </div>
-        )}
-
-        {validImages.length > 1 && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handlePrevious}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md"
             >
-              <ChevronUp className="h-5 w-5 rotate-[-90deg]" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md"
-            >
-              <ChevronDown className="h-5 w-5 rotate-[-90deg]" />
-            </Button>
-          </>
-        )}
+              <img
+                src={optimizedMainUrl}
+                alt={mainImage.alt}
+                onError={() => handleImageError(mainImage.url)}
+                className={`h-full w-full object-contain transition-transform duration-300 ${
+                  isZoomed ? "scale-150" : "scale-100"
+                }`}
+              />
+            </button>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              Sem imagem
+            </div>
+          )}
 
-        {validImages.length > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs">
-            {selectedIndex + 1} / {validImages.length}
+          {allImages.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevious}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md"
+              >
+                <ChevronUp className="h-5 w-5 rotate-[-90deg]" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md"
+              >
+                <ChevronDown className="h-5 w-5 rotate-[-90deg]" />
+              </Button>
+            </>
+          )}
+
+          {allImages.length > 1 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs">
+              {selectedIndex + 1} / {allImages.length}
+            </div>
+          )}
+        </div>
+
+        {allImages.length > 1 && (
+          <div className="relative flex flex-col items-center">
+            {allImages.length > VISIBLE_THUMBS && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={scrollThumbsUp}
+                disabled={thumbScrollIndex === 0}
+                className="h-6 w-6 mb-1"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+            )}
+
+            <div
+              ref={thumbListRef}
+              className="flex flex-col gap-2 overflow-hidden"
+              style={{ height: THUMB_HEIGHT * VISIBLE_THUMBS + THUMB_GAP * (VISIBLE_THUMBS - 1) }}
+            >
+              {visibleThumbs.map((image, index) => {
+                const realIndex = thumbScrollIndex + index
+                const thumbUrl = optimizeImageUrl(image.url, 120, 120)
+                return (
+                  <button
+                    key={realIndex}
+                    onClick={() => {
+                      setSelectedIndex(realIndex)
+                      setIsZoomed(false)
+                    }}
+                    className={`relative flex-shrink-0 w-20 h-20 overflow-hidden rounded-md border bg-muted transition-all ${
+                      selectedIndex === realIndex
+                        ? "ring-2 ring-primary border-primary"
+                        : "hover:border-primary/50"
+                    }`}
+                  >
+                    <img
+                      src={thumbUrl}
+                      alt={image.alt}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none"
+                      }}
+                      className="h-full w-full object-contain"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {allImages.length > VISIBLE_THUMBS && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={scrollThumbsDown}
+                disabled={thumbScrollIndex >= maxThumbScroll}
+                className="h-6 w-6 mt-1"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>
 
-      {validImages.length > 1 && (
-        <div className="relative flex flex-col items-center">
-          {validImages.length > VISIBLE_THUMBS && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={scrollThumbsUp}
-              disabled={thumbScrollIndex === 0}
-              className="h-6 w-6 mb-1"
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-          )}
-
-          <div
-            ref={thumbListRef}
-            className="flex flex-col gap-2 overflow-hidden"
-            style={{ height: THUMB_HEIGHT * VISIBLE_THUMBS + THUMB_GAP * (VISIBLE_THUMBS - 1) }}
-          >
-            {visibleThumbs.map((image, index) => {
-              const realIndex = thumbScrollIndex + index
-              const thumbUrl = optimizeImageUrl(image.url, 120, 120)
-              return (
-                <button
-                  key={realIndex}
-                  onClick={() => {
-                    setSelectedIndex(realIndex)
+      {variations && variations.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {variations.map((v) => {
+            const varImageIndex = varWithImages.indexOf(v)
+            const imageIndex = varImageIndex >= 0 ? varImageStartIndex + varImageIndex : -1
+            const isActive = imageIndex === selectedIndex
+            return (
+              <button
+                key={v.id}
+                onClick={() => {
+                  if (imageIndex >= 0) {
+                    setSelectedIndex(imageIndex)
                     setIsZoomed(false)
-                  }}
-                  className={`relative flex-shrink-0 w-20 h-20 overflow-hidden rounded-md border bg-muted transition-all ${
-                    selectedIndex === realIndex
-                      ? "ring-2 ring-primary border-primary"
-                      : "hover:border-primary/50"
-                  }`}
-                >
-                  <img
-                    src={thumbUrl}
-                    alt={image.alt}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none"
-                    }}
-                    className="h-full w-full object-contain"
-                    loading="lazy"
+                  }
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                  isActive
+                    ? "border-primary bg-primary/10 ring-1 ring-primary"
+                    : imageIndex >= 0
+                    ? "border-gray-300 bg-white hover:border-primary/50 cursor-pointer"
+                    : "border-gray-200 bg-gray-50 text-gray-500 cursor-default"
+                }`}
+              >
+                {v.type === "Cor" && (
+                  <div
+                    className="w-3 h-3 rounded-full border border-gray-300 shrink-0"
+                    style={{ backgroundColor: getColorHex(v.value) }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          {validImages.length > VISIBLE_THUMBS && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={scrollThumbsDown}
-              disabled={thumbScrollIndex >= maxThumbScroll}
-              className="h-6 w-6 mt-1"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          )}
+                )}
+                <span>{v.value}</span>
+                {v.sku && (
+                  <span className="text-[10px] text-gray-400 font-mono">({v.sku})</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       )}
-    </div>
+    </>
   )
 }
