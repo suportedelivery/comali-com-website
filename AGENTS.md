@@ -43,37 +43,31 @@
 /area-do-cliente           Client area
 ```
 
-### Pending Items
-- [ ] User has screenshots of current Tray layout for reference
-- [x] Choose between Strapi vs Sanity for CMS -> **Sanity**
-- [ ] Get WhatsApp business number (currently placeholder in config)
-- [ ] Get product data export from Tray
-- [ ] Define brand colors from current site (currently blue/green defaults)
-- [ ] Create Sanity project and get project ID
-- [ ] Setup Sanity Studio schema (Product, Category, BlogPost)
-- [ ] Revisar imagens de variações de cor — Tray não tem fotos individuais para cada cor (exceto Azul). Pendente de fotos reais do cliente.
+## Session Log (2026-06-27) — Menu, URLs, Variações, Domínio
 
-### Development Commands
+### Changes Made
+1. **Voltou header/footer/sitemap a usar `config.ts`** (removeu Sanity query pro menu)
+   - Categories no config: Dispensers (com Inox, Plástico, Copos), Lixeiras, Equipamentos, Produtos Químicos
+2. **Removeu URLs das descrições** de 309 produtos via script Sanity API
+   - Removeu links `comali.com.br`, `cloudfront.net`, placeholders `{{media url=...}}`, estilos `color:#fff`
+   - Manteve imagens e vídeos YouTube
+3. **Importou variações de cor** do JSON-legado pro Sanity (86 produtos com variações, imagens por cor)
+4. **Configurou domínio `comali.com.br`** no Vercel + DNS no registro.br
+5. **Footer**: só categorias principais (não mais todas as subcategorias)
+6. **Category-grid**: corrigido slug `produtos-quimicos-concentrados`
+
+### Deploy
+- Vercel: `comali/comali-com-br` → auto-deploy on push to `master`
+- Domínio: `comali.com.br` apontando pra Vercel (A `76.76.21.21`), SSL pendente
+- Staging: `https://comali-com-br.vercel.app`
+
+### Known Issues
+- Variações de cor: imagens vieram do Tray CDN (podem deixar de funcionar se Tray remover)
+- Nenhuma categoria tem `parentCategory` no Sanity (exceto Variedades, Disp Inox, Disp Plástico, Disp Copos)
+
+### Commands
 ```bash
-npm run dev          # Start development server
-npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # ESLint
-npm run typecheck    # TypeScript check
+npm run dev          # Dev server
+npm run build        # Build (377 pages geradas)
+npm run typecheck    # TSC
 ```
-
-### Project Status (2026-06-19)
-- [x] Scaffold Next.js project with TypeScript + Tailwind + shadcn/ui
-- [x] Setup project structure (components, pages, lib)
-- [x] Build layout components (Header, Footer, WhatsApp button)
-- [x] Build Home page with hero, categories, features, CTA
-- [x] Build product catalog pages (list, category, detail placeholders)
-- [x] Build blog pages (list, post placeholders)
-- [x] Build contact page with form + WhatsApp
-- [x] Build about page
-- [x] Build client area placeholder
-- [x] SEO: sitemap.xml, robots.txt, structured data, Open Graph
-- [x] WhatsApp floating button + integration
-- [ ] Configure Sanity CMS with schemas
-- [ ] Populate product data
-- [ ] Add real images and branding
