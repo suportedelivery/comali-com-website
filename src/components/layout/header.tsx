@@ -1,44 +1,16 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
 import { getProductsByCategory } from "@/lib/products"
-import { sanityClient } from "@/lib/sanity"
 import { Search, Phone } from "lucide-react"
 import { MegaMenu } from "./mega-menu"
 import { MobileNav } from "./mobile-nav"
 
-const iconMap: Record<string, string> = {
-  dispensers: "spray-can",
-  "lixeiras-e-contentores": "trash-2",
-  "equipamentos-de-limpeza": "cart",
-  "produtos-quimicos-concentrados": "flask-conical",
-}
-
-interface SanityCategory {
-  _id: string
-  name: string
-  slug: string
-  parent: string | null
-}
-
 export async function Header() {
-  const categories: SanityCategory[] = await sanityClient.fetch(
-    `*[_type == "category"]{
-      _id,
-      "name": coalesce(name, title),
-      "slug": slug.current,
-      "parent": parentCategory->slug.current
-    }`
-  )
-
-  // Build hierarchy: top-level categories are those without parent
-  const topLevel = categories.filter((c) => !c.parent)
-  const menuCategories = topLevel.map((cat) => ({
+  const menuCategories = siteConfig.categories.map((cat) => ({
     name: cat.name,
     slug: cat.slug,
-    icon: iconMap[cat.slug] || "package",
-    subcategories: categories
-      .filter((c) => c.parent === cat.slug)
-      .map((c) => ({ name: c.name, slug: c.slug })),
+    icon: cat.icon,
+    subcategories: cat.subcategories,
   }))
 
   // Load products for mega menu on the server

@@ -1,16 +1,13 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
-import { sanityClient } from "@/lib/sanity"
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
 export async function Footer() {
-  const categories: Array<{ name: string; slug: string }> = await sanityClient.fetch(
-    `*[_type == "category"]{
-      "name": coalesce(name, title),
-      "slug": slug.current
-    }`
-  )
+  const categories = siteConfig.categories.flatMap((cat) => [
+    { name: cat.name, slug: cat.slug },
+    ...cat.subcategories.map((sub) => ({ name: sub.name, slug: sub.slug })),
+  ])
 
   return (
     <footer className="border-t bg-slate-900 text-slate-100">

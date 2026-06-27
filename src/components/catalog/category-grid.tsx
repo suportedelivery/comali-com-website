@@ -5,7 +5,6 @@ import {
   SprayCan,
   Trash2,
   ShoppingCart,
-  Wrench,
   FlaskConical,
   Package,
 } from "lucide-react"
@@ -14,7 +13,7 @@ const iconMap: Record<string, React.ReactNode> = {
   dispensers: <SprayCan className="h-8 w-8" />,
   "lixeiras-e-contentores": <Trash2 className="h-8 w-8" />,
   "equipamentos-de-limpeza": <ShoppingCart className="h-8 w-8" />,
-  "produtos-de-higiene-e-limpeza": <FlaskConical className="h-8 w-8" />,
+  "produtos-quimicos-concentrados": <FlaskConical className="h-8 w-8" />,
 }
 
 export async function CategoryGrid() {
@@ -24,7 +23,7 @@ export async function CategoryGrid() {
       cat.slug === "dispensers" ||
       cat.slug === "lixeiras-e-contentores" ||
       cat.slug === "equipamentos-de-limpeza" ||
-      cat.slug === "produtos-de-higiene-e-limpeza"
+      cat.slug === "produtos-quimicos-concentrados"
   )
 
   return (
