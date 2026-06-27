@@ -129,6 +129,8 @@ function mapSanityProduct(p: any): ImportedProduct {
   }
 }
 
+const imageProjection = `externalImages[]{url, alt}`
+
 const productQuery = `*[_type == "product" && status == "active"]{
   _id,
   title,
@@ -154,10 +156,7 @@ const productQuery = `*[_type == "product" && status == "active"]{
     "slug": slug.current,
     "parent": parentCategory->slug.current
   },
-  "images": [] | coalesce(
-    externalImages[]{url, alt},
-    images[]{_type, "url": asset->url, alt}
-  ),
+  "images": ${imageProjection},
   variations,
   hasVariations,
   meta,
@@ -190,10 +189,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
     "slug": slug.current,
     "parent": parentCategory->slug.current
   },
-  "images": [] | coalesce(
-    externalImages[]{url, alt},
-    images[]{_type, "url": asset->url, alt}
-  ),
+  "images": ${imageProjection},
   variations,
   hasVariations,
   meta,
@@ -226,10 +222,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
     "slug": slug.current,
     "parent": parentCategory->slug.current
   },
-  "images": [] | coalesce(
-    externalImages[]{url, alt},
-    images[]{_type, "url": asset->url, alt}
-  ),
+  "images": ${imageProjection},
   variations,
   hasVariations,
   meta,
@@ -262,10 +255,7 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
     "slug": slug.current,
     "parent": parentCategory->slug.current
   },
-  "images": [] | coalesce(
-    externalImages[]{url, alt},
-    images[]{_type, "url": asset->url, alt}
-  ),
+  "images": ${imageProjection},
   variations,
   hasVariations,
   meta,
@@ -307,10 +297,7 @@ const searchQuery = `*[_type == "product" && status == "active" && (
     "slug": slug.current,
     "parent": parentCategory->slug.current
   },
-  "images": [] | coalesce(
-    externalImages[]{url, alt},
-    images[]{_type, "url": asset->url, alt}
-  ),
+  "images": ${imageProjection},
   variations,
   hasVariations,
   meta,
