@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next"
 import { siteConfig } from "@/lib/config"
+import { sanityClient } from "@/lib/sanity"
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     {
       url: siteConfig.url,
@@ -35,7 +36,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  const categoryPages = siteConfig.categories.map((category) => ({
+  const categories: Array<{ slug: string }> = await sanityClient.fetch(
+    `*[_type == "category"]{ "slug": slug.current }`
+  )
+
+  const categoryPages = categories.map((category) => ({
     url: `${siteConfig.url}/produtos/${category.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

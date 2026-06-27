@@ -1,9 +1,17 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
+import { sanityClient } from "@/lib/sanity"
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
-export function Footer() {
+export async function Footer() {
+  const categories: Array<{ name: string; slug: string }> = await sanityClient.fetch(
+    `*[_type == "category"]{
+      "name": coalesce(name, title),
+      "slug": slug.current
+    }`
+  )
+
   return (
     <footer className="border-t bg-slate-900 text-slate-100">
       <div className="container mx-auto px-4 py-12">
@@ -20,7 +28,7 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-white">Produtos</h4>
             <nav className="flex flex-col gap-2">
-              {siteConfig.categories.map((cat) => (
+              {categories.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/produtos/${cat.slug}`}
