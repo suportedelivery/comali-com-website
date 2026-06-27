@@ -56,8 +56,9 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
     <div className="relative" onMouseLeave={handleMouseLeave}>
       <nav className="flex items-center gap-0 bg-slate-200">
         {categories.map((category) => (
-          <button
+          <Link
             key={category.slug}
+            href={`/produtos/${category.slug}`}
             className={`flex items-center gap-1 px-4 py-3 text-base font-extrabold uppercase tracking-wide transition-colors ${
               activeCategory === category.slug
                 ? "text-white bg-slate-900"
@@ -66,12 +67,14 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
             onMouseEnter={() => handleMouseEnter(category.slug)}
           >
             {category.name}
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                activeCategory === category.slug ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+            {category.subcategories.length > 0 && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  activeCategory === category.slug ? "rotate-180" : ""
+                }`}
+              />
+            )}
+          </Link>
         ))}
       </nav>
 
@@ -86,22 +89,36 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Subcategories list */}
               <div className="md:col-span-1">
-                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
-                  Categorias
-                </h3>
-                <ul className="space-y-1">
-                  {activeCat.subcategories.map((sub) => (
-                    <li key={sub.slug}>
-                      <Link
-                        href={`/produtos/${sub.slug}`}
-                        className="flex items-center gap-2 py-1.5 text-sm text-foreground hover:text-primary transition-colors group"
-                      >
-                        <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
-                        {sub.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                    Categorias
+                  </h3>
+                  <Link
+                    href={`/produtos/${activeCat.slug}`}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    Ver todos
+                  </Link>
+                </div>
+                {activeCat.subcategories.length > 0 ? (
+                  <ul className="space-y-1">
+                    {activeCat.subcategories.map((sub) => (
+                      <li key={sub.slug}>
+                        <Link
+                          href={`/produtos/${sub.slug}`}
+                          className="flex items-center gap-2 py-1.5 text-sm text-foreground hover:text-primary transition-colors group"
+                        >
+                          <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                          {sub.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Todas as subcategorias
+                  </p>
+                )}
               </div>
 
               {/* Featured products for this category */}
