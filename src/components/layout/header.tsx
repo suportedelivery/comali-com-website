@@ -6,12 +6,12 @@ import { Search, Phone } from "lucide-react"
 import { MegaMenu } from "./mega-menu"
 import { MobileNav } from "./mobile-nav"
 
-export function Header() {
+export async function Header() {
   // Load products for mega menu on the server
   const productsByCategory: Record<string, Array<{ title: string; slug: string; image: string | null }>> = {}
   
-  siteConfig.categories.forEach((cat) => {
-    const products = getProductsByCategory(cat.slug)
+  for (const cat of siteConfig.categories) {
+    const products = (await getProductsByCategory(cat.slug))
       .slice(0, 4)
       .map((p) => ({
         title: p.title,
@@ -19,7 +19,7 @@ export function Header() {
         image: p.images[0]?.url || null,
       }))
     productsByCategory[cat.slug] = products
-  })
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

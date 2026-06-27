@@ -20,7 +20,7 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params
-  const product = getProductBySlug(slug)
+  const product = await getProductBySlug(slug)
   if (!product) return { title: "Produto não encontrado" }
   return {
     title: product.meta.title,
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
 }
 
 export async function generateStaticParams() {
-  const products = getAllProducts()
+  const products = await getAllProducts()
   return products.map((product) => ({
     categoria: product.categories[0]?.slug || "produtos",
     slug: product.slug,
@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
-  const product = getProductBySlug(slug)
+  const product = await getProductBySlug(slug)
 
   if (!product) notFound()
 

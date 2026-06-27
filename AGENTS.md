@@ -51,6 +51,7 @@
 - [ ] Define brand colors from current site (currently blue/green defaults)
 - [ ] Create Sanity project and get project ID
 - [ ] Setup Sanity Studio schema (Product, Category, BlogPost)
+- [ ] Revisar imagens de variações de cor — Tray não tem fotos individuais para cada cor (exceto Azul). Pendente de fotos reais do cliente.
 
 ### Development Commands
 ```bash

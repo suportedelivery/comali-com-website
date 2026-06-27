@@ -1,18 +1,4 @@
-// Check if we're running in a browser environment
-const isBrowser = typeof window !== 'undefined'
-
-// Initialize variables
-let readFileSync: ((path: string, encoding?: string) => string) | undefined = undefined
-let join: ((...paths: string[]) => string) | undefined = undefined
-
-// Only load Node.js modules if we're on the server
-if (!isBrowser) {
-  // Dynamic import for Node.js modules (only available on server)
-  const fs = require("fs")
-  const path = require("path")
-  readFileSync = fs.readFileSync
-  join = path.join
-}
+import { sanityClient } from "./sanity"
 
 interface ImportedProduct {
   id: string
@@ -76,16 +62,12 @@ interface ImportedProduct {
   createdAt: string | null
 }
 
-let cachedProducts: ImportedProduct[] = []
-
 function sanitizeText(text: string | null | undefined, brand?: string | null): string {
   if (!text) return "";
   let sanitized = text;
   
-  // Remove "Bralimpia" explicitly
   sanitized = sanitized.replace(/Bralimpia/gi, "");
   
-  // Also dynamically remove the product's own brand if it exists
   if (brand && brand.trim() !== "") {
     const safeBrand = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const brandRegex = new RegExp(`\\b${safeBrand}\\b`, 'gi');
@@ -95,82 +77,329 @@ function sanitizeText(text: string | null | undefined, brand?: string | null): s
   return sanitized.replace(/  +/g, " ").trim();
 }
 
-function loadProducts(): ImportedProduct[] {
-  // If we're in the browser, return empty array (cannot access filesystem)
-  if (isBrowser || !readFileSync || !join) {
-    return []
+function mapSanityProduct(p: any): ImportedProduct {
+  return {
+    id: p._id,
+    title: sanitizeText(p.title, p.brand) || p.title,
+    slug: p.slug?.current || p.slug || "",
+    description: sanitizeText(p.description, p.brand) || "",
+    descriptionHTML: sanitizeText(p.descriptionHTML || p.description, p.brand) || "",
+    brand: p.brand || null,
+    model: p.model || null,
+    reference: sanitizeText(p.reference, p.brand) || null,
+    ean: p.ean || null,
+    categories: (p.categories || []).map((c: any) => ({
+      name: c.title || c.name || "",
+      slug: c.slug?.current || c.slug || "",
+      parent: c.parent?.slug?.current || c.parent || undefined,
+    })),
+    images: (p.images || []).map((img: any) => ({
+      url: img.url || "",
+      alt: img.alt || p.title,
+    })),
+    price: p.price ?? null,
+    weight: p.weight ?? null,
+    dimensions: p.dimensions || { length: null, width: null, height: null },
+    stock: p.stock ?? 0,
+    availability: p.availability || null,
+    warranty: p.warranty || null,
+    featured: p.featured ?? false,
+    new: p.new ?? false,
+    active: p.status === "active",
+    variations: (p.variations || []).map((v: any) => ({
+      id: v.id || v._key || "",
+      name: v.name || "",
+      type: v.type || "",
+      value: v.value || "",
+      type2: v.type2 || null,
+      value2: v.value2 || null,
+      sku: v.sku || "",
+      ean: v.ean || null,
+      price: v.price ?? null,
+      stock: v.stock ?? 0,
+      weight: v.weight ?? null,
+      dimensions: v.dimensions || { length: null, width: null, height: null },
+      image: v.image || null,
+      availability: v.availability || null,
+    })),
+    hasVariations: p.hasVariations ?? (p.variations?.length > 0),
+    meta: p.meta || { title: p.title, description: "", keywords: null },
+    trayUrl: p.trayUrl || null,
+    createdAt: p.createdAt || null,
   }
+}
 
-  if (cachedProducts.length > 0) return cachedProducts
+const productQuery = `*[_type == "product" && status == "active"]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  descriptionHTML,
+  brand,
+  model,
+  reference,
+  ean,
+  price,
+  weight,
+  stock,
+  availability,
+  warranty,
+  dimensions,
+  featured,
+  "new": new,
+  status,
+  "categories": categories[]->{
+    _id,
+    "title": coalesce(name, title),
+    "slug": slug.current,
+    "parent": parentCategory->slug.current
+  },
+  "images": [] | coalesce(
+    externalImages[]{url, alt},
+    images[]{_type, "url": asset->url, alt}
+  ),
+  variations,
+  hasVariations,
+  meta,
+  trayUrl,
+  createdAt
+}`
 
+const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  descriptionHTML,
+  brand,
+  model,
+  reference,
+  ean,
+  price,
+  weight,
+  stock,
+  availability,
+  warranty,
+  dimensions,
+  featured,
+  "new": new,
+  status,
+  "categories": categories[]->{
+    _id,
+    "title": coalesce(name, title),
+    "slug": slug.current,
+    "parent": parentCategory->slug.current
+  },
+  "images": [] | coalesce(
+    externalImages[]{url, alt},
+    images[]{_type, "url": asset->url, alt}
+  ),
+  variations,
+  hasVariations,
+  meta,
+  trayUrl,
+  createdAt
+}`
+
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  descriptionHTML,
+  brand,
+  model,
+  reference,
+  ean,
+  price,
+  weight,
+  stock,
+  availability,
+  warranty,
+  dimensions,
+  featured,
+  "new": new,
+  status,
+  "categories": categories[]->{
+    _id,
+    "title": coalesce(name, title),
+    "slug": slug.current,
+    "parent": parentCategory->slug.current
+  },
+  "images": [] | coalesce(
+    externalImages[]{url, alt},
+    images[]{_type, "url": asset->url, alt}
+  ),
+  variations,
+  hasVariations,
+  meta,
+  trayUrl,
+  createdAt
+}`
+
+const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  descriptionHTML,
+  brand,
+  model,
+  reference,
+  ean,
+  price,
+  weight,
+  stock,
+  availability,
+  warranty,
+  dimensions,
+  featured,
+  "new": new,
+  status,
+  "categories": categories[]->{
+    _id,
+    "title": coalesce(name, title),
+    "slug": slug.current,
+    "parent": parentCategory->slug.current
+  },
+  "images": [] | coalesce(
+    externalImages[]{url, alt},
+    images[]{_type, "url": asset->url, alt}
+  ),
+  variations,
+  hasVariations,
+  meta,
+  trayUrl,
+  createdAt
+}`
+
+const categoryQuery = `*[_type == "category"]{
+  _id,
+  "name": coalesce(name, title),
+  "slug": slug.current,
+  "parent": parentCategory->slug.current
+}`
+
+const searchQuery = `*[_type == "product" && status == "active" && (
+  title match $query || description match $query || brand match $query || reference match $query
+)]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  descriptionHTML,
+  brand,
+  model,
+  reference,
+  ean,
+  price,
+  weight,
+  stock,
+  availability,
+  warranty,
+  dimensions,
+  featured,
+  "new": new,
+  status,
+  "categories": categories[]->{
+    _id,
+    "title": coalesce(name, title),
+    "slug": slug.current,
+    "parent": parentCategory->slug.current
+  },
+  "images": [] | coalesce(
+    externalImages[]{url, alt},
+    images[]{_type, "url": asset->url, alt}
+  ),
+  variations,
+  hasVariations,
+  meta,
+  trayUrl,
+  createdAt
+}`
+
+let cachedProducts: ImportedProduct[] = []
+let productsLoaded = false
+
+async function loadProducts(): Promise<ImportedProduct[]> {
+  if (productsLoaded) return cachedProducts
   try {
-    const filePath = join(process.cwd(), "data", "tray-products-imported.json")
-    const fileContent = readFileSync(filePath, "utf-8")
-    const data = JSON.parse(fileContent)
-    cachedProducts = data.products
-      .filter((p: ImportedProduct) => p.active)
-      .map((p: ImportedProduct) => ({
-        ...p,
-        title: sanitizeText(p.title, p.brand),
-        description: sanitizeText(p.description, p.brand),
-        descriptionHTML: sanitizeText(p.descriptionHTML, p.brand),
-        reference: sanitizeText(p.reference, p.brand)
-      }))
+    const products: any[] = await sanityClient.fetch(productQuery)
+    cachedProducts = products.map(mapSanityProduct)
+    productsLoaded = true
     return cachedProducts
   } catch (error) {
-    console.error("Erro ao carregar produtos:", error)
+    console.error("Erro ao carregar produtos do Sanity:", error)
     return []
   }
 }
 
-export function getAllProducts(): ImportedProduct[] {
+export async function getAllProducts(): Promise<ImportedProduct[]> {
   return loadProducts()
 }
 
-export function getProductBySlug(slug: string): ImportedProduct | undefined {
-  const products = loadProducts()
-  return products.find((p) => p.slug === slug)
+export async function getProductBySlug(slug: string): Promise<ImportedProduct | undefined> {
+  try {
+    const product = await sanityClient.fetch(productBySlugQuery, { slug })
+    return product ? mapSanityProduct(product) : undefined
+  } catch (error) {
+    console.error("Erro ao buscar produto por slug:", error)
+    return undefined
+  }
 }
 
-export function getProductsByCategory(categorySlug: string): ImportedProduct[] {
-  const products = loadProducts()
-  return products.filter((p) =>
-    p.categories.some((c) => c.slug === categorySlug)
-  )
+export async function getProductsByCategory(categorySlug: string): Promise<ImportedProduct[]> {
+  try {
+    const products = await sanityClient.fetch(productsByCategoryQuery, { categorySlug })
+    return products.map(mapSanityProduct)
+  } catch (error) {
+    console.error("Erro ao buscar produtos por categoria:", error)
+    return []
+  }
 }
 
-export function getFeaturedProducts(limit = 8): ImportedProduct[] {
-  const products = loadProducts()
-  return products.filter((p) => p.featured).slice(0, limit)
+export async function getFeaturedProducts(limit = 8): Promise<ImportedProduct[]> {
+  try {
+    const products = await sanityClient.fetch(featuredProductsQuery)
+    return products.slice(0, limit).map(mapSanityProduct)
+  } catch (error) {
+    console.error("Erro ao buscar produtos em destaque:", error)
+    return []
+  }
 }
 
-export function getProductsByBrand(brand: string): ImportedProduct[] {
-  const products = loadProducts()
+export async function getProductsByBrand(brand: string): Promise<ImportedProduct[]> {
+  const products = await loadProducts()
   return products.filter((p) => p.brand === brand)
 }
 
-export function getAllCategories(): Array<{ name: string; slug: string; count: number }> {
-  const products = loadProducts()
-  const categoryMap = new Map<string, { name: string; count: number }>()
+export async function getAllCategories(): Promise<Array<{ name: string; slug: string; count: number }>> {
+  try {
+    const products = await loadProducts()
+    const categoryMap = new Map<string, { name: string; count: number }>()
 
-  products.forEach((product) => {
-    product.categories.forEach((cat) => {
-      const existing = categoryMap.get(cat.slug)
-      if (existing) {
-        existing.count++
-      } else {
-        categoryMap.set(cat.slug, { name: cat.name, count: 1 })
-      }
+    products.forEach((product) => {
+      product.categories.forEach((cat) => {
+        const existing = categoryMap.get(cat.slug)
+        if (existing) {
+          existing.count++
+        } else {
+          categoryMap.set(cat.slug, { name: cat.name, count: 1 })
+        }
+      })
     })
-  })
 
-  return Array.from(categoryMap.entries())
-    .map(([slug, data]) => ({ slug, ...data }))
-    .sort((a, b) => b.count - a.count)
+    return Array.from(categoryMap.entries())
+      .map(([slug, data]) => ({ slug, ...data }))
+      .sort((a, b) => b.count - a.count)
+  } catch (error) {
+    console.error("Erro ao buscar categorias:", error)
+    return []
+  }
 }
 
-export function getAllBrands(): Array<{ name: string; count: number }> {
-  const products = loadProducts()
+export async function getAllBrands(): Promise<Array<{ name: string; count: number }>> {
+  const products = await loadProducts()
   const brandMap = new Map<string, number>()
 
   products.forEach((product) => {
@@ -184,15 +413,12 @@ export function getAllBrands(): Array<{ name: string; count: number }> {
     .sort((a, b) => b.count - a.count)
 }
 
-export function searchProducts(query: string): ImportedProduct[] {
-  const products = loadProducts()
-  const searchLower = query.toLowerCase()
-
-  return products.filter(
-    (p) =>
-      p.title.toLowerCase().includes(searchLower) ||
-      p.description.toLowerCase().includes(searchLower) ||
-      p.brand?.toLowerCase().includes(searchLower) ||
-      p.reference?.toLowerCase().includes(searchLower)
-  )
+export async function searchProducts(query: string): Promise<ImportedProduct[]> {
+  try {
+    const products: any[] = await sanityClient.fetch(searchQuery, { query: `*${query}*` } as any)
+    return products.map(mapSanityProduct)
+  } catch (error) {
+    console.error("Erro ao buscar produtos:", error)
+    return []
+  }
 }

@@ -17,8 +17,8 @@ const iconMap: Record<string, React.ReactNode> = {
   "produtos-de-higiene-e-limpeza": <FlaskConical className="h-8 w-8" />,
 }
 
-export function CategoryGrid() {
-  const allCategories = getAllCategories()
+export async function CategoryGrid() {
+  const allCategories = await getAllCategories()
   const mainCategories = allCategories.filter(
     (cat) =>
       cat.slug === "dispensers" ||
