@@ -4,10 +4,10 @@ import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
 export async function Footer() {
-  const categories = siteConfig.categories.flatMap((cat) => [
-    { name: cat.name, slug: cat.slug },
-    ...cat.subcategories.map((sub) => ({ name: sub.name, slug: sub.slug })),
-  ])
+  const categories = siteConfig.categories.map((cat) => ({
+    name: cat.name,
+    slug: cat.slug,
+  }))
 
   return (
     <footer className="border-t bg-slate-900 text-slate-100">
