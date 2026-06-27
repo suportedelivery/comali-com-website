@@ -64,7 +64,6 @@ export const siteConfig = {
         { name: "Baldes", slug: "baldes" },
         { name: "Rodo Limpa Vidros", slug: "rodo-limpa-vidros" },
         { name: "Placas de Sinalização", slug: "placas-de-sinalizacao" },
-        { name: "MOP Pó", slug: "mop-po" },
       ],
     },
     {
