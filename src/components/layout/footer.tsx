@@ -193,10 +193,6 @@ export async function Footer() {
               <span className="text-cyan-400 font-semibold">SuporteDelivery.com</span>
             </a>
           </div>
-          <p className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} {siteConfig.name}. Todos os
-            direitos reservados.
-          </p>
         </div>
       </div>
     </footer>
