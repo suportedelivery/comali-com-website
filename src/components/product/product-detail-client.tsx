@@ -65,7 +65,7 @@ export function ProductDetailClient({ product }: { product: ProductData }) {
             <div className="flex flex-wrap items-center gap-1.5">
               {product.reference && (
                 <span className="text-[10px] text-muted-foreground bg-gray-100 px-1.5 py-0.5 rounded font-mono">
-                  Ref: CMI{product.reference}
+                  Ref: {product.reference}
                 </span>
               )}
             </div>
