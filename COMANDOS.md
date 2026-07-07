@@ -92,9 +92,28 @@ set -a && source .env.local && set +a && npx tsx scripts/<nome>.ts
 
 | Script | Quando usar |
 |---|---|
-| `init-product-order.ts` | Ordenar produtos alfabeticamente |
+| `export-product-order.ts` | Exportar produtos com ordem pra CSV |
+| `import-product-order.ts` | Importar ordem do CSV pro Sanity |
+| `init-product-order.ts` | Ordenar todos os produtos alfabeticamente |
 | `migrate-products-to-sanity.ts` | Importar produtos do CSV legado |
 | `fix-product-categories.ts` | Corrigir categorias de produtos |
+
+### Reordenar produtos via CSV
+
+```bash
+# 1. Exportar (gera ordem-produtos.csv)
+set -a && source .env.local && set +a && npx tsx scripts/export-product-order.ts
+
+# 2. Editar ordem-produtos.csv no Excel/Google Sheets
+#    → alterar a coluna "sortOrder" (menor = primeiro)
+#    → salvar como CSV (UTF-8)
+
+# 3. Importar (atualiza no Sanity)
+set -a && source .env.local && set +a && npx tsx scripts/import-product-order.ts
+
+# 4. Enviar pro site
+git add . && git commit -m "feat: reordena produtos" && git push origin master
+```
 
 ---
 
