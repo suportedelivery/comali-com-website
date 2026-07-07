@@ -1,4 +1,6 @@
 import Link from "next/link"
+
+export const revalidate = 60
 import { Button } from "@/components/ui/button"
 import { CategoryGrid } from "@/components/catalog/category-grid"
 import { ProductCard } from "@/components/product/product-card"

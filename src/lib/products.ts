@@ -305,16 +305,10 @@ const searchQuery = `*[_type == "product" && status == "active" && (
   createdAt
 }`
 
-let cachedProducts: ImportedProduct[] = []
-let productsLoaded = false
-
 async function loadProducts(): Promise<ImportedProduct[]> {
-  if (productsLoaded) return cachedProducts
   try {
     const products: any[] = await sanityClient.fetch(productQuery)
-    cachedProducts = products.map(mapSanityProduct)
-    productsLoaded = true
-    return cachedProducts
+    return products.map(mapSanityProduct)
   } catch (error) {
     console.error("Erro ao carregar produtos do Sanity:", error)
     return []
