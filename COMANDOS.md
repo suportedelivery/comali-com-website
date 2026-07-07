@@ -1,180 +1,164 @@
 # Comandos — Comali.com.br
 
-Referência rápida de todos os comandos do projeto.
+---
+
+## Como o deploy funciona (resumo rápido)
+
+```
+Você edita código → git push → Vercel faz build automático → site atualiza
+```
+
+**Você não precisa fazer nada na Vercel.** É só dar `git push` e a Vercel faz tudo sozinha (~2-4 min).
 
 ---
 
-## 1. Next.js (npm run)
+## Comandos do dia a dia
+
+### 1. Rodar o site localmente
 
 ```bash
-npm run dev          # Servidor de desenvolvimento (localhost:3000)
-npm run build        # Build de produção
-npm run start        # Inicia servidor de produção (após build)
-npm run lint         # ESLint
-npm run typecheck    # Verificação TypeScript (tsc --noEmit)
+npm run dev
 ```
+
+Abre `http://localhost:3000` — dados do Sanity em tempo real, sem cache.
+
+### 2. Enviar alterações pro site (deploy)
+
+```bash
+git add .
+git commit -m "feat: o que foi feito"
+git push origin master
+```
+
+Pronto. A Vercel detecta o push e faz o build automaticamente.
+
+### 3. Verificar o que mudou
+
+```bash
+git status          # Quais arquivos foram alterados
+git diff            # O que mudou dentro dos arquivos
+git log --oneline -5 # Últimos 5 commits
+```
+
+### 4. Verificar se há commits não enviados
+
+```bash
+git status -sb
+```
+
+Se mostrar `ahead 3` → tem 3 commits esperando pra ser enviados. Faça `git push`.
 
 ---
 
-## 2. Git
+## Checar antes de enviar
 
 ```bash
-git status                # Ver arquivos modificados
-git diff                  # Ver alterações pendentes
-git log --oneline -10     # Últimos 10 commits
-git add .                 # Adiciona todos os arquivos
-git add <arquivo>         # Adiciona arquivo específico
-git commit -m "msg"       # Cria commit
-git push origin master    # Envia para GitHub (dispara deploy na Vercel)
-git pull origin master    # Puxa alterações do repositório
+npm run typecheck    # Verifica erros de TypeScript
+npm run lint         # Verifica erros de estilo (ESLint)
+npm run build        # Build completo (mesmo que a Vercel faz)
 ```
 
-**Fluxo padrão (deploy):**
-```bash
-git add . && git commit -m "feat: descrição" && git push origin master
-```
-
-**Verificar se há commits não enviados:**
-```bash
-git status -sb   # Mostra "ahead N" se houver commits pendentes
-```
+Se `npm run build` passar sem erros, o deploy na Vercel vai funcionar.
 
 ---
 
-## 3. Scripts de Migração Sanity
+## Sanity Studio (gerenciar produtos)
 
-Todos ficam em `scripts/`. Executar com:
+### Abrir o Studio local
+
+```bash
+npx sanity@latest dev
+```
+
+Abre `http://localhost:3333` — interface visual pra editar produtos, categorias, etc.
+
+### Deploy do schema (quando o schema é alterado)
+
+```bash
+npx sanity@latest schema deploy
+```
+
+Precisa estar logado no Sanity. Roda uma vez quando o schema muda.
+
+---
+
+## Scripts de migração (uso raro)
+
+Todos ficam em `scripts/`. Rodar com:
+
 ```bash
 set -a && source .env.local && set +a && npx tsx scripts/<nome>.ts
 ```
 
-| Script | Função |
+| Script | Quando usar |
 |---|---|
-| `migrate-products-to-sanity.ts` | Importa produtos do CSV legado para Sanity |
-| `migrate-remaining-products.ts` | Importa produtos restantes não migrados |
-| `migrate-categories-to-sanity.ts` | Importa categorias do CSV para Sanity |
-| `migrate-html-descriptions.ts` | Migra descrições HTML para Sanity |
-| `fix-product-categories.ts` | Corrige categorias de produtos no Sanity |
-| `fix-description-colors.ts` | Corrige cores nas descrições |
-| `add-image-urls.ts` | Adiciona URLs de imagens externas |
-| `clear-prices.ts` | Limpa preços (define como null) |
+| `init-product-order.ts` | Ordenar produtos alfabeticamente |
+| `migrate-products-to-sanity.ts` | Importar produtos do CSV legado |
+| `fix-product-categories.ts` | Corrigir categorias de produtos |
 
 ---
 
-## 4. Sanity Studio
+## Referência rápida
 
-```bash
-npx sanity@latest dev              # Abre Studio local (localhost:3333)
-npx sanity@latest schema deploy    # Deploy schema alterado
-npx sanity@latest dataset create   # Cria novo dataset
-```
+### Variáveis de ambiente (`.env.local`)
 
-**Variáveis necessárias (já no `.env.local`):**
 ```
 NEXT_PUBLIC_SANITY_PROJECT_ID=5fcrgo8n
 NEXT_PUBLIC_SANITY_DATASET=production
 SANITY_API_TOKEN=sk...
 ```
 
----
+### URLs
 
-## 5. Vercel / Deploy
+| Ambiente | URL |
+|---|---|
+| Local | `http://localhost:3000` |
+| Produção | `https://comali.com.br` |
+| Staging | `https://comali-com-br.vercel.app` |
+| Sanity Studio | `http://localhost:3333` |
 
-### Deploy Automático
-- Toda alteração em `master` (push) dispara build automático na Vercel
-- Build leva ~2-4 minutos
-- Staging: `https://comali-com-br.vercel.app`
-- Produção: `https://comali.com.br`
+### Fluxo de deploy
 
-### Variáveis de Ambiente (Vercel)
 ```
-NEXT_PUBLIC_SANITY_PROJECT_ID=5fcrgo8n
-NEXT_PUBLIC_SANITY_DATASET=production
-SANITY_API_TOKEN=sk...
-```
-
-### ISR (Incremental Static Regeneration)
-Páginas com `export const revalidate = 60` re-buscam dados do Sanity a cada 60 segundos.
-
-```typescript
-// Em qualquer page.tsx:
-export const revalidate = 60
+git push origin master
+        ↓
+Vercel detecta o push
+        ↓
+Build (~2-4 min)
+        ↓
+Site atualizado em comali.com.br
 ```
 
-### Domínio
-- Domínio: `comali.com.br` (registro.br)
-- Apontamento: A `76.76.21.21` (Vercel)
-- Redirect: `www.comali.com.br` → `comali.com.br` (301)
-
-### Sanity Client Config
-```typescript
-// src/lib/sanity.ts
-useCdn: false  // Dados sempre frescos (sem cache do Sanity CDN)
-```
+**Não existe botão de deploy na Vercel.** É automático.
 
 ---
 
-## 6. Troubleshooting
+## Troubleshooting
 
 ### Mudanças no Sanity não aparecem no site
 
-**Checklist:**
-1. Verificar se o campo foi **Publicado** no Sanity Studio (não só salvo)
-2. Rodar `git status` — se mostrar `ahead > 0`, fazer push
-3. Aguardar ~2-4 min para build da Vercel
-4. Fazer **Ctrl+Shift+R** no navegador (hard refresh)
-5. Verificar build: `npm run build` local deve passar sem erros
+1. Campo foi **Publicado** no Studio? (não só salvo)
+2. Push foi feito? (`git status -sb` → `ahead 0`)
+3. Aguardou ~2-4 min?
+4. Ctrl+Shift+R no navegador?
 
-### Produtos "draft" aparecem no site
+### Produto "draft" aparece no site
 
-As queries GROQ filtram `status == "active"`. Se um produto draft aparece:
-- Verificar se o campo `Status` está realmente como "Rascunho" (não "Ativo")
-- No Sanity Studio, abrir o produto → campo Status → selecionar "Rascunho" → **Publish**
-- "Move to draft" (menu ⋮) **NÃO** altera o campo `status` — só move pra draft do Studio
+- Abrir o produto no Studio
+- Campo **Status** → selecionar "Rascunho"
+- Clicar em **Publish**
+- "Move to draft" (menu ⋮) NÃO altera o campo `status`
 
-### Cache em memória (NUNCA fazer)
+### localhost mostra coisa diferente do site
 
-```typescript
-// ERRADO — cache global em módulo Server Component
-let cachedData = null
-let loaded = false
-async function getData() {
-  if (loaded) return cachedData  // ← DADOS ANTIGOS!
-  cachedData = await fetch(...)
-  loaded = true
-  return cachedData
-}
-
-// CORRETO — sempre buscar dados frescos
-async function getData() {
-  return await fetch(...)
-}
-```
-
-### Diferença localhost vs Produção
-
-| Ambiente | Fonte dos dados | Cache |
-|---|---|---|
-| `npm run dev` (localhost) | Sanity API (tempo real) | Nenhum |
-| Vercel (produção) | Sanity API via build + ISR | HTML estático + revalidate=60s |
-
-### Sanity CDN vs API direta
-
-| Config | Comportamento |
+| Ambiente | Comportamento |
 |---|---|
-| `useCdn: true` | Cache do Sanity CDN (~60s+) — pode servir dados antigos |
-| `useCdn: false` | API direta — dados sempre frescos (recomendado) |
+| `npm run dev` | Dados do Sanity em tempo real |
+| Site (Vercel) | HTML estático + revalida a cada 60s |
 
 ### Build local falha
 
 ```bash
-npm run typecheck    # Verificar erros TypeScript
-npm run lint         # Verificar erros ESLint
-npm run build        # Build completo
+npm run typecheck    # Erros TypeScript
+npm run lint         # Erros ESLint
 ```
-
-### Vercel não deploya
-
-1. Verificar se o push foi feito: `git status -sb`
-2. Verificar se há erros de build no dashboard da Vercel
-3. Verificar se as variáveis de ambiente estão configuradas na Vercel
