@@ -82,3 +82,53 @@ npm run dev          # Dev server
 npm run build        # Build
 npm run typecheck    # TSC
 ```
+
+## Session Log (2027-07-07) — Caching, ISR, Sanity CDN
+
+### Problema
+Produtos colocados como "draft" no Sanity Studio continuavam aparecendo no site. Produtos que tiveram categorias alteradas no Sanity continuavam na categoria antiga. Mudanças no Sanity não refletiam no site da Vercel.
+
+### Causa Raiz (3 camadas de cache)
+
+1. **Cache em memória no servidor** (`src/lib/products.ts`):
+   - Variáveis `cachedProducts` e `productsLoaded` faziam cache global em módulo
+   - Na Vercel, a instância da função serverless ficava viva por ~30s-5min
+   - Toda requisição dentro desse período retornava dados antigos
+   - **Afetava**: `getAllProducts()` e `getAllCategories()` (home, catálogo)
+
+2. **Sanity CDN** (`src/lib/sanity.ts`):
+   - `useCdn: true` ativava cache do Sanity CDN (60s+)
+   - Mesmo com dados frescos no Sanity, o client buscava versão cacheada
+
+3. **Sem ISR** (nenhuma página):
+   - Nenhuma página tinha `export const revalidate`
+   - Páginas com `generateStaticParams()` eram estáticas para sempre
+   - Dados só atualizavam no próximo `next build` (deploy)
+
+### Diferença Crítica: localhost vs Produção
+- **`npm run dev` (localhost)**: busca dados do Sanity em tempo real, sem cache
+- **Vercel (produção)**: páginas são HTML estático gerado no build, com cache
+- Mudanças no Sanity refletiam em `localhost` mas NÃO na Vercel
+
+### Commits
+1. `6967c8c` — removeu cache em memória + adicionou `export const revalidate = 60` em 5 páginas
+2. `5aa4b1d` — desabilitou Sanity CDN (`useCdn: false`)
+
+### Arquivos Alterados
+- `src/lib/products.ts` — removido `cachedProducts` / `productsLoaded`
+- `src/lib/sanity.ts` — `useCdn: true` → `useCdn: false`
+- `src/app/page.tsx` — adicionado `export const revalidate = 60`
+- `src/app/produtos/page.tsx` — adicionado `export const revalidate = 60`
+- `src/app/produtos/[categoria]/page.tsx` — adicionado `export const revalidate = 60`
+- `src/app/produtos/[categoria]/[slug]/page.tsx` — adicionado `export const revalidate = 60`
+
+### Regra para o Futuro
+- Quando mudar dados no Sanity (categorias, status, etc.), esperar até 60 segundos
+- Fazer **Ctrl+Shift+R** (hard refresh) no navegador para limpar cache local
+- Se não refletir, verificar se o push foi feito (`git status` → `ahead 0`)
+- **NUNCA** usar cache em módulo (`let cached = ...`) em Server Components Next.js
+
+### Queries GROQ (referência)
+- `productQuery`: filtra `status == "active"` — rascunhos NÃO aparecem
+- `productsByCategoryQuery`: filtra `status == "active"` + slug da categoria
+- `productBySlugQuery`: NÃO filtra por status (acesso direto por slug funciona para qualquer status)
