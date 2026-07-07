@@ -35,6 +35,13 @@ export default defineType({
       initialValue: "active",
     }),
     defineField({
+      name: "sortOrder",
+      title: "Ordem",
+      type: "number",
+      description: "Define a posição do produto na lista da categoria. Menor = primeiro.",
+      initialValue: 0,
+    }),
+    defineField({
       name: "featured",
       title: "Destaque na Home",
       type: "boolean",

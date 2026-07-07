@@ -32,6 +32,7 @@ interface ImportedProduct {
   featured: boolean
   new: boolean
   active: boolean
+  sortOrder: number
   variations: Array<{
     id: string
     name: string
@@ -106,6 +107,7 @@ function mapSanityProduct(p: any): ImportedProduct {
     featured: p.featured ?? false,
     new: p.new ?? false,
     active: p.status === "active",
+    sortOrder: p.sortOrder ?? 0,
     variations: (p.variations || []).map((v: any) => ({
       id: v.id || v._key || "",
       name: v.name || "",
@@ -131,7 +133,7 @@ function mapSanityProduct(p: any): ImportedProduct {
 
 const imageProjection = `externalImages[]{url, alt}`
 
-const productQuery = `*[_type == "product" && status == "active"]{
+const productQuery = `*[_type == "product" && status == "active"] | order(sortOrder asc, title asc){
   _id,
   title,
   "slug": slug.current,
@@ -147,6 +149,7 @@ const productQuery = `*[_type == "product" && status == "active"]{
   availability,
   warranty,
   dimensions,
+  sortOrder,
   featured,
   "new": new,
   status,
@@ -180,6 +183,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   availability,
   warranty,
   dimensions,
+  sortOrder,
   featured,
   "new": new,
   status,
@@ -197,7 +201,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   createdAt
 }`
 
-const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current]{
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
   _id,
   title,
   "slug": slug.current,
@@ -213,6 +217,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   availability,
   warranty,
   dimensions,
+  sortOrder,
   featured,
   "new": new,
   status,
@@ -230,7 +235,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   createdAt
 }`
 
-const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true]{
+const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true] | order(sortOrder asc, title asc){
   _id,
   title,
   "slug": slug.current,
@@ -246,6 +251,7 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
   availability,
   warranty,
   dimensions,
+  sortOrder,
   featured,
   "new": new,
   status,
@@ -263,7 +269,7 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
   createdAt
 }`
 
-const categoryQuery = `*[_type == "category"]{
+const categoryQuery = `*[_type == "category"] | order(order asc, title asc){
   _id,
   "name": coalesce(name, title),
   "slug": slug.current,
@@ -272,7 +278,7 @@ const categoryQuery = `*[_type == "category"]{
 
 const searchQuery = `*[_type == "product" && status == "active" && (
   title match $query || description match $query || brand match $query || reference match $query
-)]{
+)] | order(sortOrder asc, title asc){
   _id,
   title,
   "slug": slug.current,
@@ -288,6 +294,7 @@ const searchQuery = `*[_type == "product" && status == "active" && (
   availability,
   warranty,
   dimensions,
+  sortOrder,
   featured,
   "new": new,
   status,

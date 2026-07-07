@@ -15,6 +15,7 @@ export interface Product {
   warranty: string | null
   weight: number | null
   dimensions: { length: number | null; width: number | null; height: number | null } | null
+  sortOrder: number
   featured: boolean
   new: boolean
   status: string
@@ -46,7 +47,7 @@ export interface Category {
   parentCategory: { _ref: string; _type: "reference" } | null
 }
 
-const productQuery = `*[_type == "product" && status == "active"]{
+const productQuery = `*[_type == "product" && status == "active"] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -61,6 +62,7 @@ const productQuery = `*[_type == "product" && status == "active"]{
   warranty,
   weight,
   dimensions,
+  sortOrder,
   featured,
   new,
   status,
@@ -126,7 +128,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   meta
 }`
 
-const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current]{
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -141,6 +143,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   warranty,
   weight,
   dimensions,
+  sortOrder,
   featured,
   new,
   status,
@@ -166,7 +169,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   meta
 }`
 
-const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true]{
+const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -181,6 +184,7 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
   warranty,
   weight,
   dimensions,
+  sortOrder,
   featured,
   new,
   status,
@@ -206,7 +210,7 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
   meta
 }`
 
-const categoryQuery = `*[_type == "category"]{
+const categoryQuery = `*[_type == "category"] | order(order asc, title asc){
   _id,
   _type,
   title,
@@ -275,7 +279,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     description match $query ||
     brand match $query ||
     reference match $query
-  )]{
+  )] | order(sortOrder asc, title asc){
     _id,
     _type,
     title,
@@ -290,6 +294,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     warranty,
     weight,
     dimensions,
+    sortOrder,
     featured,
     new,
     status,
