@@ -77,7 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
           render={
             <a
               href={getWhatsAppUrl(
-                `Olá! Gostaria de solicitar um orçamento para: ${product.title}`,
+                `Olá! Gostaria de solicitar um orçamento para: ${product.reference ? `${product.reference}: ` : ""}${product.title}`,
                 product.title
               )}
               target="_blank"

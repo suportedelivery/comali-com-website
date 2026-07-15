@@ -1,0 +1,8 @@
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/.opencode/skills/comali-migration/SKILL.md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/.sanity/runtime/index.html
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/AGENTS (cópia).md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/AGENTS.md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/CAMPANHAS-GOOGLE-ADS.md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/COMANDOS.md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/CONTEXTO_CAMPANHA.md
+/media/sdcloud/AppleSSD/Opencode/comali.com.br/README.md

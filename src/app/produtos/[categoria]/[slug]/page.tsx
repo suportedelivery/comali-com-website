@@ -45,7 +45,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound()
 
   const mainCategory = product.categories[0]
-  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para: ${product.title}${product.reference ? ` (Ref: ${product.reference})` : ""}`
+  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para: ${product.reference ? `${product.reference}: ` : ""}${product.title}`
 
   return (
     <div className="container mx-auto px-4 py-12 bg-gray-50 min-h-screen">

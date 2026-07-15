@@ -1,5 +1,13 @@
 # Comali.com.br - Project Context
 
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+
+---
+
 ## Decision Log (2026-06-19)
 
 ### Project Background
@@ -132,3 +140,98 @@ Produtos colocados como "draft" no Sanity Studio continuavam aparecendo no site.
 - `productQuery`: filtra `status == "active"` — rascunhos NÃO aparecem
 - `productsByCategoryQuery`: filtra `status == "active"` + slug da categoria
 - `productBySlugQuery`: NÃO filtra por status (acesso direto por slug funciona para qualquer status)
+
+---
+
+## Session Log (2026-07-14) — SortOrder, WhatsApp, Export CSV
+
+### Mudanças Feitas
+1. **SortOrder importado** de `REVISÃO_CORRIGIDO - REVISÃO_CORRIGIDO.csv` (fonte canônica)
+2. **Produtos draft/discontinued** receberam sortOrder 9000-9430
+3. **Sanity Studio structure** criada em `src/sanity/structure.ts` — ordena produtos por `sortOrder asc`
+4. **Categorias duplicadas removidas** — Papel Higiênico Rolão (20 produtos) e Teste Categoria
+5. **Formato WhatsApp** alterado para rastreamento de anúncios:
+   - Antes: `{title} (Ref: {reference})`
+   - Agora: `{reference}: {title}`
+   - Arquivos: `page.tsx:48`, `product-detail-client.tsx:50`, `product-card.tsx:80`
+6. **Script export-products.py** criado — exporta 347 produtos com todos os campos
+7. **PRODUTOS_COMPLETO.csv** gerado (23 colunas) — pronto para revisão/correções
+8. **Marcas removidas** de WhatsApp, meta.title, meta.description em Sanity (293 produtos)
+9. **Formato WhatsApp atualizado** em Sanity para `{reference}: {title}` (345 produtos)
+
+### Arquivos Importantes
+| Arquivo | Descrição |
+|---------|-----------|
+| `REVISÃO_CORRIGIDO - REVISÃO_CORRIGIDO.csv` | **Fonte canônica do sortOrder** |
+| `REVISÃO_CORRIGIDO.csv` | Categorias corrigidas (sortOrder vazio) |
+| `ordem-produtos.csv` | **NÃO USAR** — valores errados |
+| `export-products.py` | Script de export CSV completo (filtra drafts) |
+| `PRODUTOS_COMPLETO.csv` | Export com 347 produtos |
+
+### Comandos
+```bash
+python3 export-products.py           # Gerar PRODUTOS_COMPLETO.csv
+python3 -m http.server 8000          # Visualizar CSV no navegador
+```
+
+---
+
+## Google Ads — Workflow de Importação
+
+### Template de Importação
+- `TEMPLATE_CLIENTE_utf16.csv` — CSV pronto para preencher e importar no Google Ads Editor
+- **Encoding:** UTF-16LE com BOM (obrigatório para Editor)
+
+### Regras de Importação
+- **Descrições:** máx. 35 caracteres
+- **Headlines:** máx. 30 caracteres
+- **Sitelink Titles:** máx. 25 caracteres
+- **Callouts:** máx. 25 caracteres
+- **Keywords:** usar aspas para phrase match + Max CPC
+
+### Checklist de Importação
+- [ ] Preencher TEMPLATE_CLIENTE_utf16.csv com dados do cliente
+- [ ] Criar sitelinks separados (sitelinks_complete_utf16.csv)
+- [ ] Criar callouts separados (callouts_complete_utf16.csv)
+- [ ] Criar negativas separadas (negativas_complete_utf16.csv)
+- [ ] Importar no Google Ads Editor
+- [ ] Vincular sitelinks às campanhas
+- [ ] Vincular callouts às campanhas
+- [ ] Revisar e publicar
+
+---
+
+## Sessão e Memória
+
+### Inicializar ruflo (primeira vez no projeto):
+```
+ruflo init
+ruflo memory init
+```
+
+### Ao iniciar sessão:
+```
+ruflo hooks session-restore
+```
+
+### Ao encerrar sessão:
+```
+ruflo hooks session-end
+```
+
+### Para salvar dados pontuais:
+```
+ruflo memory store -k "chave" --value "conteúdo"
+```
+
+### Para buscar dados salvos:
+```
+ruflo memory search -q "busca"
+```
+
+### Alias rápido (colocar no ~/.bashrc):
+```bash
+alias comali='cd /media/sdcloud/AppleSSD/Opencode/comali.com.br && ruflo hooks session-restore'
+```
+
+Depois de adicionar ao `~/.bashrc`, use `source ~/.bashrc` e pronto — só digitar `comali` no terminal.

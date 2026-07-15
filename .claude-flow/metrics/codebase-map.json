@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-14T15:59:07.996Z",
+  "projectRoot": "/media/sdcloud/AppleSSD/Opencode/comali.com.br",
+  "structure": {
+    "hasPackageJson": true,
+    "hasTsConfig": true,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1784044747996
+}

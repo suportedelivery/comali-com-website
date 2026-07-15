@@ -47,7 +47,7 @@ function getColorHex(colorName: string): string {
 
 export function ProductDetailClient({ product }: { product: ProductData }) {
   const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null)
-  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para: ${product.title}${product.reference ? ` (Ref: ${product.reference})` : ""}`
+  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para: ${product.reference ? `${product.reference}: ` : ""}${product.title}`
 
   return (
     <>
