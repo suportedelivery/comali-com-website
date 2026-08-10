@@ -176,28 +176,87 @@ python3 -m http.server 8000          # Visualizar CSV no navegador
 
 ---
 
+## Session Log (2026-08-10) — SEO URLs Hierárquicas, Slug Categoria
+
+### Problema
+Produtos listados em subcategorias (ex: `hotelaria`, `hospitalar`) geravam links com URL incorreta. Ao clicar num produto na subcategoria, a URL levava para `/produtos/produtos-quimicos-concentrados/produto` em vez de `/produtos/produtos-quimicos-concentrados/hotelaria/produto`.
+
+Além disso, a página `/produtos/produtos-quimicos-concentrados/frigorifico-abastecimento` retornava 404.
+
+### Causa Raiz — Bug ProductCard
+
+Em `src/components/product/product-card.tsx`, o código tentava acessar `c.parentCategory?.slug?.current`, mas na projeção GROQ de `sanity-products.ts`, o campo `parentCategory.slug` já é uma **string plana** (`"slug": slug.current`), não um objeto `{ current: string }`. Logo, `.current` retornava `undefined` e o `parentSlug` nunca resolvia.
+
+### Causa Raiz — Slug com Duplo Hífen
+
+A categoria "Frigorífico / abastecimento" teve a barra `/` convertida em `--` na geração automática do slug → `frigorifico--abastecimento`. A URL acessada usava hífen simples (`frigorifico-abastecimento`) que não existia.
+
+### Correções Feitas
+
+1. **`src/components/product/product-card.tsx`** — adicionados helpers `getCatSlug()` e `getParentSlug()` que lidam com `slug` tanto como string plana quanto como objeto `{ current }`:
+   ```ts
+   const getCatSlug = (c) => c?.slug?.current || c?.slug || ""
+   const getParentSlug = (c) => {
+     const pc = c?.parentCategory
+     if (!pc) return undefined
+     return typeof pc.slug === "string" ? pc.slug : pc.slug?.current
+   }
+   ```
+
+2. **Sanity — categoria `frigorifico--abastecimento`** — slug corrigido para `frigorifico-abastecimento` via MCP patch + publish.
+
+### Regra para o Futuro
+
+- Projeções GROQ com `"campo": referencia->campo.current` retornam **string plana**, não objeto
+- Nunca acessar `.current` em campo já projetado como string
+- Slugs com caracteres especiais (`/`, `&`, etc.) no título geram `--` no slug automático — revisar manualmente após importação
+
+### Arquivos Alterados
+- `src/components/product/product-card.tsx` — corrigida resolução de `parentSlug`
+
+### Comandos de Deploy
+```bash
+# Verificar tipos antes de enviar
+npm run typecheck
+
+# Enviar para produção (Vercel auto-deploy via master)
+git add -A && git commit -m "mensagem" && git push origin master
+
+# Acompanhar o deploy
+# https://vercel.com/comali/comali-com-br
+```
+
+---
+
 ## Google Ads — Workflow de Importação
 
-### Template de Importação
-- `TEMPLATE_CLIENTE_utf16.csv` — CSV pronto para preencher e importar no Google Ads Editor
-- **Encoding:** UTF-16LE com BOM (obrigatório para Editor)
+### Estrutura do Gerador (`gerar-csv-template.py`)
+Para evitar erros e avisos de validação no Google Ads Editor (como problemas de idioma pai ou ausência de lances padrão), o gerador cria o CSV em um formato **hierárquico por linhas**:
+1. **Linhas de Campanha**: Definem os campos da campanha (nome, orçamento, redes, idioma `pt`, etc.). Todos os campos de grupos de anúncios, palavras-chave e anúncios ficam vazios nestas linhas.
+2. **Linhas de Grupo de Anúncios**: Definem o grupo de anúncios e o lance padrão `Max CPC` (definido como `8.00`). Os campos de campanhas e anúncios ficam vazios nestas linhas.
+3. **Linhas de Palavras-Chave**: Definem os termos das palavras-chave e o tipo de correspondência.
+4. **Linhas de Anúncio**: Definem os anúncios Responsivos de Pesquisa (títulos, descrições, URL final e caminhos).
 
-### Regras de Importação
-- **Descrições:** máx. 35 caracteres
-- **Headlines:** máx. 30 caracteres
-- **Sitelink Titles:** máx. 25 caracteres
-- **Callouts:** máx. 25 caracteres
-- **Keywords:** usar aspas para phrase match + Max CPC
+### Regras de Validação e Limites
+- **Títulos (Headlines)**: Máximo de 30 caracteres.
+- **Descrições (Descriptions)**: Máximo de 90 caracteres.
+- **Caminhos (Paths)**: Máximo de 15 caracteres.
+- **Estratégia de Lances**: "Maximize clicks" (Maximizar cliques) para suportar limites de lances.
+- **Campos Duplicados**: Não incluir a coluna `Keyword Type` para evitar duplicidade de mapeamento com `Match Type`.
 
-### Checklist de Importação
-- [ ] Preencher TEMPLATE_CLIENTE_utf16.csv com dados do cliente
-- [ ] Criar sitelinks separados (sitelinks_complete_utf16.csv)
-- [ ] Criar callouts separados (callouts_complete_utf16.csv)
-- [ ] Criar negativas separadas (negativas_complete_utf16.csv)
-- [ ] Importar no Google Ads Editor
-- [ ] Vincular sitelinks às campanhas
-- [ ] Vincular callouts às campanhas
-- [ ] Revisar e publicar
+### Como Gerar e Importar
+1. **Gerar o arquivo**:
+   ```bash
+   python3 gerar-csv-template.py
+   ```
+2. **Verificar a saída**:
+   O script roda um validador automático no final. Certifique-se de ver a mensagem:
+   `SUCCESS: All generated rows passed Google Ads validations successfully!`
+3. **Subir no Google Ads Editor**:
+   - Vá em **Conta > Importar > Do arquivo...** (`Account > Import > From File...`).
+   - Selecione o arquivo gerado: `campanhas-novas-gads.csv`.
+   - Se houver algum erro de importação residual por conta de importações anteriores quebradas salvas na memória local, selecione as campanhas com erro no menu esquerdo, clique com o botão direito, escolha **Reverter** para limpar o cache local, e re-importe o arquivo.
+4. **Resultado**: O arquivo é gerado em codificação `UTF-16LE` com `BOM` e quebras de linha `CRLF` (padrão nativo do Google Ads Editor).
 
 ---
 

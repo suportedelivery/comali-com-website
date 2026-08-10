@@ -3,11 +3,17 @@
 import { useState } from "react"
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
+import type { NavItem } from "@/lib/navigation"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, Search, Phone } from "lucide-react"
 
-export function MobileNav() {
+interface MobileNavProps {
+  nav?: NavItem[]
+}
+
+export function MobileNav({ nav }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const navItems = nav && nav.length > 0 ? nav : siteConfig.nav
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -37,7 +43,7 @@ export function MobileNav() {
             <span>(41) 3029-5678</span>
           </a>
 
-          {siteConfig.nav.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -47,6 +53,7 @@ export function MobileNav() {
               {item.title}
             </Link>
           ))}
+
           <Link
             href="/contato"
             onClick={() => setIsOpen(false)}

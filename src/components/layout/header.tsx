@@ -1,17 +1,13 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
+import { getSiteNavigation } from "@/lib/navigation"
 import { getProductsByCategory } from "@/lib/products"
 import { Search, Phone } from "lucide-react"
 import { MegaMenu } from "./mega-menu"
 import { MobileNav } from "./mobile-nav"
 
 export async function Header() {
-  const menuCategories = siteConfig.categories.map((cat) => ({
-    name: cat.name,
-    slug: cat.slug,
-    icon: cat.icon,
-    subcategories: cat.subcategories,
-  }))
+  const { nav: customNav, categories: menuCategories } = await getSiteNavigation()
 
   // Load products for mega menu on the server
   const productsByCategory: Record<string, Array<{ title: string; slug: string; image: string | null }>> = {}
@@ -26,6 +22,7 @@ export async function Header() {
       }))
     productsByCategory[cat.slug] = products
   }
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -76,8 +73,9 @@ export async function Header() {
           </Link>
         </div>
 
-        <MobileNav />
+        <MobileNav nav={customNav} />
       </div>
+
 
       {/* Navigation bar with mega menu */}
       <div className="hidden md:block border-t bg-white">

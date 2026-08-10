@@ -25,7 +25,7 @@ function getProductImagesForMosaic(products: Product[], count: number = 12): Arr
         alt: extImg?.alt || intImg?.alt || product.title,
         title: product.title,
         slug: product.slug?.current || "",
-        categorySlug: (product.categories[0] as any)?.slug || 'produtos',
+        categorySlug: Array.isArray(product.categories) && product.categories.length > 0 ? (product.categories[0] as any)?.slug || 'produtos' : 'produtos',
       })
       if (images.length >= count) break
     }
@@ -209,7 +209,7 @@ export function HeroCarousel({ featuredProducts = [], allProducts = [] }: HeroCa
                     slide.products.map((product) => (
                       <Link
                         key={product._id}
-                        href={`/produtos/${(product.categories[0] as any)?.slug || 'produtos'}/${product.slug?.current || ''}`}
+                        href={`/produtos/${Array.isArray(product.categories) && product.categories.length > 0 ? (product.categories[0] as any)?.slug || 'produtos' : 'produtos'}/${product.slug?.current || ''}`}
                         className="group relative overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-lg transition-all duration-300"
                       >
                         <div className="aspect-square relative overflow-hidden">

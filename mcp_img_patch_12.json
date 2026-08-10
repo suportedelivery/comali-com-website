@@ -1,0 +1,57 @@
+{
+  "patch": {
+    "product-da-c9p6853": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c9p6853",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/9818de8c-e5b5-4320-a4d3-32e60b33612e_6853.jpg",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c9p7236": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c9p7236",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/70f4a9d8-bda6-4b00-b5a4-e4edefcaecfc_11_frasco_def_01_litro_branco_100gr.jpg",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c9p7579": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c9p7579",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/6749b8c2-36ae-46b3-8a1e-d2b3c908cc1a_7559 - CENTRAL DE DILUICAO.jpg",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "drafts": [
+    "drafts.product-da-c9p6853",
+    "drafts.product-da-c9p7236",
+    "drafts.product-da-c9p7579"
+  ]
+}

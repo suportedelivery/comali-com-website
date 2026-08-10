@@ -1,0 +1,261 @@
+{
+  "patch": {
+    "product-da-c3p640": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p640",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/11aceff6-1d6e-4c7b-b5ae-8e040c4c5b5e_smoke_clean_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p559": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p559",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/6b1dbcaf-52bb-4dad-aa6b-fdf68c3ca09f_brilho_inox_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p573": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p573",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/3fb7a807-d7cd-4ef1-b436-45ce308641b9_glass_original_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p664": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p664",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/9d8d2ed9-169f-4f9e-bb4b-21cf44d6e38f_glass_new_c_floral_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p665": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p665",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/7db8e1b7-2f35-4ca3-bcf4-aefa2203c28d_glass_new_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p5948": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p5948",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/afe71638-93be-4ab5-a0f7-fe5b5656ab58_sabonete_liquido_antisseptico_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p7557": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p7557",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/6ca0b0e7-e1e1-4d96-82ec-834e6b4c3514_alcool_gel_70_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p781": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p781",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/b2e68d10-6657-433a-ad98-ad925db908a7_alcool_liquido_70_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c3p7672": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c3p7672",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/d4802a35-c1b8-4083-a76d-135d91585ed2_Fita.jpg",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p774": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p774",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/853a7e52-a69c-4cbf-bea7-34b886067073_flash_combat_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p597": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p597",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/5c79f69c-7871-4357-9bbe-2ef417eeeb6b_flash_floor_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p783": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p783",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/d3d360aa-3fc0-4e39-9107-a2c6d254403e_amonium_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p591": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p591",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/360007ac-ca9d-425b-98a3-fd9254d80f2e_espuma_clor_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p715": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p715",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/5968d63f-ac9e-4af5-9b1a-966c851ad589_force_clorigel_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "product-da-c4p573": {
+      "patches": [
+        {
+          "set": {
+            "externalImages": [
+              {
+                "_type": "image",
+                "_key": "img_product-da-c4p573",
+                "url": "https://api.deaquimica.ind.br/imagens/produtos/3fb7a807-d7cd-4ef1-b436-45ce308641b9_glass_original_imagem_site.png",
+                "alt": "Imagem do produto D&A Química"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "drafts": [
+    "drafts.product-da-c3p640",
+    "drafts.product-da-c3p559",
+    "drafts.product-da-c3p573",
+    "drafts.product-da-c3p664",
+    "drafts.product-da-c3p665",
+    "drafts.product-da-c3p5948",
+    "drafts.product-da-c3p7557",
+    "drafts.product-da-c3p781",
+    "drafts.product-da-c3p7672",
+    "drafts.product-da-c4p774",
+    "drafts.product-da-c4p597",
+    "drafts.product-da-c4p783",
+    "drafts.product-da-c4p591",
+    "drafts.product-da-c4p715",
+    "drafts.product-da-c4p573"
+  ]
+}

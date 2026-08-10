@@ -9,6 +9,7 @@ import type { Product } from "@/lib/sanity-products"
 
 interface ProductCardProps {
   product: Product
+  currentCategorySlug?: string
 }
 
 function optimizeImageUrl(url: string, width: number, height: number): string {
@@ -22,19 +23,44 @@ function optimizeImageUrl(url: string, width: number, height: number): string {
   return url
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, currentCategorySlug }: ProductCardProps) {
   // Use externalImages if available, fallback to images
   const externalImg = (product as any).externalImages?.[0]
   const internalImg = product.images?.[0]
   const imageUrl = externalImg?.url || (internalImg as any)?.url
   const optimizedUrl = imageUrl ? optimizeImageUrl(imageUrl, 400, 400) : null
-  const categoryName = (product.categories?.[0] as any)?.title
-  const categorySlug = (product.categories?.[0] as any)?.slug || "produtos"
-  const productSlug = product.slug?.current || ""
+  
+  // parentCategory.slug vem como string plana da projeção GROQ ("slug": slug.current)
+  // Então c.parentCategory?.slug é uma string, NÃO um objeto { current: string }
+  const getCatSlug = (c: any): string => c?.slug?.current || c?.slug || ""
+  const getParentSlug = (c: any): string | undefined => {
+    const pc = c?.parentCategory
+    if (!pc) return undefined
+    // slug pode ser string plana (GROQ projeção) ou objeto { current: string }
+    return typeof pc.slug === "string" ? pc.slug : pc.slug?.current
+  }
+
+  // Prioriza categoria que bate com currentCategorySlug E tem pai
+  const matchedSubCat = currentCategorySlug
+    ? product.categories?.find((c: any) => getCatSlug(c) === currentCategorySlug && getParentSlug(c))
+    : undefined
+  // Fallback: qualquer subcategoria com pai, depois a primeira categoria
+  const subCat = matchedSubCat
+    || product.categories?.find((c: any) => getParentSlug(c))
+    || product.categories?.[0] as any
+
+  const parentSlug = getParentSlug(subCat)
+  const categorySlug = getCatSlug(subCat) || "produtos"
+  const productSlug = product.slug?.current || (product.slug as any) || ""
+  const categoryName = subCat?.title || subCat?.name
+
+  const linkHref = parentSlug
+    ? `/produtos/${parentSlug}/${categorySlug}/${productSlug}`
+    : `/produtos/${categorySlug}/${productSlug}`
 
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg border border-gray-200 hover:border-gray-300 bg-white">
-      <Link href={`/produtos/${categorySlug}/${productSlug}`}>
+      <Link href={linkHref}>
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 p-4">
 {optimizedUrl ? (
               <img

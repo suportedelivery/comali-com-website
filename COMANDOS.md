@@ -24,6 +24,12 @@ Abre `http://localhost:3000` — dados do Sanity em tempo real, sem cache.
 
 ### 2. Enviar alterações pro site (deploy)
 
+git add .
+git commit -m "feat: menus dinamicos e integracao de produtos D&A no Sanity"
+git push origin master
+
+
+
 ```bash
 git add .
 git commit -m "feat: o que foi feito"

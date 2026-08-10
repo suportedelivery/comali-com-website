@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next"
 import { siteConfig } from "@/lib/config"
+import { getSiteNavigation } from "@/lib/navigation"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { categories } = await getSiteNavigation()
+
   const staticPages = [
     {
       url: siteConfig.url,
@@ -35,9 +38,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  const categorySlugs = siteConfig.categories.flatMap((cat) => [
+  const categorySlugs = categories.flatMap((cat) => [
     cat.slug,
-    ...cat.subcategories.map((sub) => sub.slug),
+    ...(cat.subcategories || []).map((sub) => `${cat.slug}/${sub.slug}`),
   ])
 
   const categoryPages = categorySlugs.map((slug) => ({
@@ -46,6 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }))
+
 
   return [...staticPages, ...categoryPages]
 }

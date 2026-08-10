@@ -22,7 +22,7 @@ interface MegaMenuProps {
   categories: ReadonlyArray<{
     readonly name: string
     readonly slug: string
-    readonly icon: string
+    readonly icon?: string
     readonly subcategories: ReadonlyArray<{ readonly name: string; readonly slug: string }>
   }>
   productsByCategory: Record<string, ReadonlyArray<{ readonly title: string; readonly slug: string; readonly image: string | null }>>
@@ -105,7 +105,7 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
                     {activeCat.subcategories.map((sub) => (
                       <li key={sub.slug}>
                         <Link
-                          href={`/produtos/${sub.slug}`}
+                          href={`/produtos/${activeCat.slug}/${sub.slug}`}
                           className="flex items-center gap-2 py-1.5 text-sm text-foreground hover:text-primary transition-colors group"
                         >
                           <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />

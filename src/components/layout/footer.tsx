@@ -1,13 +1,11 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
+import { getSiteNavigation } from "@/lib/navigation"
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
 export async function Footer() {
-  const categories = siteConfig.categories.map((cat) => ({
-    name: cat.name,
-    slug: cat.slug,
-  }))
+  const { nav: navItems, categories: menuCategories } = await getSiteNavigation()
 
   return (
     <footer className="border-t bg-slate-900 text-slate-100">
@@ -25,7 +23,7 @@ export async function Footer() {
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-white">Produtos</h4>
             <nav className="flex flex-col gap-2">
-              {categories.map((cat) => (
+              {menuCategories.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/produtos/${cat.slug}`}
@@ -40,7 +38,7 @@ export async function Footer() {
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-white">Links</h4>
             <nav className="flex flex-col gap-2">
-              {siteConfig.nav.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -49,6 +47,7 @@ export async function Footer() {
                   {item.title}
                 </Link>
               ))}
+
               <Link
                 href="/parceiros"
                 className="text-sm text-slate-400 hover:text-cyan-400 transition-colors"

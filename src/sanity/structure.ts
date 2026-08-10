@@ -5,6 +5,15 @@ export const structure: StructureResolver = (S) =>
     .title("Comali Studio")
     .items([
       S.listItem()
+        .title("Navegação & Menus")
+        .child(
+          S.document()
+            .schemaType("navigation")
+            .documentId("siteNavigation")
+            .title("Configuração dos Menus")
+        ),
+      S.divider(),
+      S.listItem()
         .title("Produtos")
         .child(
           S.documentTypeList("product")
@@ -18,6 +27,7 @@ export const structure: StructureResolver = (S) =>
       S.divider(),
       ...S.documentTypeListItems().filter(
         (item) =>
-          item.getId() && !["product", "category"].includes(item.getId()!)
+          item.getId() && !["product", "category", "navigation"].includes(item.getId()!)
       ),
     ])
+

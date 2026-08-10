@@ -1,0 +1,632 @@
+[
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p694",
+      "title": "MAX DRASTIC",
+      "slug": {
+        "_type": "slug",
+        "current": "max-drastic"
+      },
+      "reference": "CMI-DA-C2P694",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX DRASTIC - TIRA FERRUGEM PARA ROUPAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1035
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p786",
+      "title": "MAX SOFT",
+      "slug": {
+        "_type": "slug",
+        "current": "max-soft"
+      },
+      "reference": "CMI-DA-C2P786",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX SOFT - AMACIANTE PARA ROUPAS A BASE DE ATIVO BIODEGRADÁVEL. APRESENTA-SE NAS VERSÕES COM E SEM PERFUME. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1036
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p749",
+      "title": "MAX SOFT 500 GLAMOUR",
+      "slug": {
+        "_type": "slug",
+        "current": "max-soft-500-glamour"
+      },
+      "reference": "CMI-DA-C2P749",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX SOFT 500 GLAMOUR - AMACIANTE PARA ROUPAS COM TECNOLOGIA DE ENCAPSULAMENTO DE FRAGRÂNCIA. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1037
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p564",
+      "title": "MAX PASTA",
+      "slug": {
+        "_type": "slug",
+        "current": "max-pasta"
+      },
+      "reference": "CMI-DA-C2P564",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX PASTA - PASTA UMECTANTE. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1038
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p656",
+      "title": "MAX AGIL",
+      "slug": {
+        "_type": "slug",
+        "current": "max-agil"
+      },
+      "reference": "CMI-DA-C2P656",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX AGIL - TIRA MANCHAS A BASE DE OXIGÊNIO ATIVO IDEAL PARA PUNHOS E COLARINHOS SEGURO PARA ROUPAS COLORIDAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1039
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p590",
+      "title": "MAX FACILIT LUXO",
+      "slug": {
+        "_type": "slug",
+        "current": "max-facilit-luxo"
+      },
+      "reference": "CMI-DA-C2P590",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX FACILIT LUXO - FACILITADOR DE PASSAR ROUPAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1040
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p713",
+      "title": "MAX FACILIT TERNURA",
+      "slug": {
+        "_type": "slug",
+        "current": "max-facilit-ternura"
+      },
+      "reference": "CMI-DA-C2P713",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "MAX FACILIT TERNURA - FACILITADOR DE PASSAR ROUPAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1041
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c2p555",
+      "title": "SANYX SOFT PLUS",
+      "slug": {
+        "_type": "slug",
+        "current": "sanyx-soft-plus"
+      },
+      "reference": "CMI-DA-C2P555",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "lavanderias-industriais"
+      ],
+      "description": "SANYX SOFT PLUS - DESODORIZANTE E PERFUMADOR DE TECIDOS E DESINFETANTE E LIMPADOR CONCENTRADO DE USO GERAL. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1042
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p527",
+      "title": "CLEANER MATIC",
+      "slug": {
+        "_type": "slug",
+        "current": "cleaner-matic"
+      },
+      "reference": "CMI-DA-C3P527",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "CLEANER MATIC - DETERGENTE CLORADO PARA MÁQUINAS DE LAVAR LOUÇAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1043
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p526",
+      "title": "CLEANER MATIC PLUS",
+      "slug": {
+        "_type": "slug",
+        "current": "cleaner-matic-plus"
+      },
+      "reference": "CMI-DA-C3P526",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "CLEANER MATIC PLUS - DETERGENTE ISENTO DE CLORO PARA MÁQUINAS DE LAVAR LOUÇAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1044
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p735",
+      "title": "D&SEC X-15",
+      "slug": {
+        "_type": "slug",
+        "current": "dsec-x-15"
+      },
+      "reference": "CMI-DA-C3P735",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "D&SEC X-15 - SECANTE ABRILHANTADOR PARA MÁQUINAS DE LAVAR LOUÇAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1045
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p782",
+      "title": "D&A NEWTON",
+      "slug": {
+        "_type": "slug",
+        "current": "da-newton"
+      },
+      "reference": "CMI-DA-C3P782",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "D&A NEWTON - DETERGENTE LAVA LOUÇAS CONCENTRADO A BASE DE TENSOATIVOS BIODEGRADAVEIS PARA SUPERFÍCIES LAVÁVEIS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1046
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p508",
+      "title": "D&CLEAN ORIGINAL",
+      "slug": {
+        "_type": "slug",
+        "current": "dclean-original"
+      },
+      "reference": "CMI-DA-C3P508",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "D&CLEAN ORIGINAL - DETERGENTE NEUTRO PARA LAVAGEM DE LOUÇAS E UTENSÍLIOS EM GERAL. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1047
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p537",
+      "title": "1000 PLUS SEM FRAGRANCIA",
+      "slug": {
+        "_type": "slug",
+        "current": "1000-plus-sem-fragrancia"
+      },
+      "reference": "CMI-DA-C3P537",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "1000 PLUS SEM FRAGRANCIA - DETERGENTE DE USO GERAL. LIMPADOR MULTIUSO CONCENTRADO SEM PERFUME. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1048
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p591",
+      "title": "ESPUMA CLOR",
+      "slug": {
+        "_type": "slug",
+        "current": "espuma-clor"
+      },
+      "reference": "CMI-DA-C3P591",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "ESPUMA CLOR - DETERGENTE DESINCRUSTANTE ALCALINO CLORADO PARA LIMPEZA PESADA. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1049
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p783",
+      "title": "AMONIUM",
+      "slug": {
+        "_type": "slug",
+        "current": "amonium"
+      },
+      "reference": "CMI-DA-C3P783",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "AMONIUM - DETERGENTE DESENGRAXANTE E LIMPADOR AMONIACAL. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1050
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p533",
+      "title": "ALL CLEAR",
+      "slug": {
+        "_type": "slug",
+        "current": "all-clear"
+      },
+      "reference": "CMI-DA-C3P533",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "ALL CLEAR - DESENGORDURANTE E DESENGRAXANTE A BASE DE SODA CAUSTICA PARA LIMPEZA DE GORDURAS CARBONIZADAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1051
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p673",
+      "title": "ALL CLEAR PLUS",
+      "slug": {
+        "_type": "slug",
+        "current": "all-clear-plus"
+      },
+      "reference": "CMI-DA-C3P673",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "ALL CLEAR PLUS - DESENGORDURANTE E DESENGRAXANTE ISENTO DE SODA CAUSTICA PARA LIMPEZA DE GORDURAS CARBONIZADAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1052
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p503",
+      "title": "ALUMEX",
+      "slug": {
+        "_type": "slug",
+        "current": "alumex"
+      },
+      "reference": "CMI-DA-C3P503",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "ALUMEX - DECAPANTE E DESINCRUSTANTE ÁCIDO PARA LIMPEZA PESADA DE INOX, ALUMÍNIO, GANCHOS E CARRETILHAS. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1053
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p730",
+      "title": "AUTO CLEAR",
+      "slug": {
+        "_type": "slug",
+        "current": "auto-clear"
+      },
+      "reference": "CMI-DA-C3P730",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "AUTO CLEAR - DESENGRAXANTE ALCALINO ISENTO DE SODA CÁUSTICA P/LIMPEZA DE COIFAS LAVADORAS E SISTEMA AUTO LIMPANTE. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1054
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p557",
+      "title": "BACTER PLUS",
+      "slug": {
+        "_type": "slug",
+        "current": "bacter-plus"
+      },
+      "reference": "CMI-DA-C3P557",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "BACTER PLUS - DESINFETANTE PARA HORTIFRUTÍCOLAS E ÁREAS DE MANIPULAÇÃO DE ALIMENTOS A BASE DE 2,2% DE CLORO ATIVO. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1055
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p630",
+      "title": "SANICID",
+      "slug": {
+        "_type": "slug",
+        "current": "sanicid"
+      },
+      "reference": "CMI-DA-C3P630",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "SANICID - DESINFETANTE A BASE DE QUATERNARIO DE AMONIO. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1056
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p784",
+      "title": "SANYX PLUS",
+      "slug": {
+        "_type": "slug",
+        "current": "sanyx-plus"
+      },
+      "reference": "CMI-DA-C3P784",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "SANYX PLUS - DESINFETANTE, DESOSORIZANTE E LIMPADOR DE USO GERAL DE ALTA PERFUMAÇÃO. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1057
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p530",
+      "title": "SANYX SUAVE",
+      "slug": {
+        "_type": "slug",
+        "current": "sanyx-suave"
+      },
+      "reference": "CMI-DA-C3P530",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "SANYX SUAVE - DESINFETANTE, DESOSORIZANTE E LIMPADOR DE USO GERAL DE SUAVE PERFUMAÇÃO. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1058
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p645",
+      "title": "DISSOLVINI",
+      "slug": {
+        "_type": "slug",
+        "current": "dissolvini"
+      },
+      "reference": "CMI-DA-C3P645",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "DISSOLVINI - DESINCRUSTANTE E DECAPANTE PARA INOX. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1059
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p640",
+      "title": "SMOKE CLEAN",
+      "slug": {
+        "_type": "slug",
+        "current": "smoke-clean"
+      },
+      "reference": "CMI-DA-C3P640",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "SMOKE CLEAN - LIMPADOR DE FUMAÇA. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1060
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p559",
+      "title": "BRILHO INOX",
+      "slug": {
+        "_type": "slug",
+        "current": "brilho-inox"
+      },
+      "reference": "CMI-DA-C3P559",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "BRILHO INOX - ABRILHANTADOR DE INOX. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1061
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p573",
+      "title": "GLASS ORIGINAL",
+      "slug": {
+        "_type": "slug",
+        "current": "glass-original"
+      },
+      "reference": "CMI-DA-C3P573",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "GLASS ORIGINAL - MULTI USO E LIMPA VIDROS PRONTO USO. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1062
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p664",
+      "title": "GLASS NEW C FLORAL 1:10",
+      "slug": {
+        "_type": "slug",
+        "current": "glass-new-c-floral-110"
+      },
+      "reference": "CMI-DA-C3P664",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "GLASS NEW C FLORAL 1:10 - MULTI USO E LIMPA VIDROS PERFUMADO CONCENTRADO 1:10. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1063
+    }
+  },
+  {
+    "type": "product",
+    "content": {
+      "_type": "product",
+      "_id": "product-da-c3p665",
+      "title": "GLASS NEW 1:40",
+      "slug": {
+        "_type": "slug",
+        "current": "glass-new-140"
+      },
+      "reference": "CMI-DA-C3P665",
+      "category": "produtos-quimicos-concentrados",
+      "subcategories": [
+        "food-service"
+      ],
+      "description": "GLASS NEW 1:40 - MULTI USO E LIMPA VIDROS CONCENTRADO 1:40. Produto químico concentrado D&A fornecido pela Comali para higienização profissional.",
+      "status": "active",
+      "featured": false,
+      "sortOrder": 1064
+    }
+  }
+]

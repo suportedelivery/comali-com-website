@@ -6,6 +6,7 @@ export interface Product {
   title: string
   slug: { current: string }
   description: string | null
+  descriptionHTML?: string | null
   brand: string | null
   reference: string | null
   ean: string | null
@@ -19,7 +20,13 @@ export interface Product {
   featured: boolean
   new: boolean
   status: string
-  categories: Array<{ _ref: string; _type: "reference" }>
+  categories: Array<{
+    _id: string
+    title: string
+    slug: string | { current: string }
+    parent?: string
+    parentCategory?: { title: string; slug: { current: string } }
+  }>
   images: Array<{
     _type: "image"
     asset: { _ref: string }
@@ -44,7 +51,7 @@ export interface Category {
   slug: { current: string }
   description: string | null
   order: number
-  parentCategory: { _ref: string; _type: "reference" } | null
+  parentCategory: { _id: string; title: string; slug: { current: string } } | null
 }
 
 const productQuery = `*[_type == "product" && status == "active"] | order(sortOrder asc, title asc){
@@ -53,6 +60,7 @@ const productQuery = `*[_type == "product" && status == "active"] | order(sortOr
   title,
   slug,
   description,
+  descriptionHTML,
   brand,
   reference,
   ean,
@@ -69,7 +77,12 @@ const productQuery = `*[_type == "product" && status == "active"] | order(sortOr
   "categories": categories[]->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentCategory": parentCategory->{
+      _id,
+      title,
+      "slug": slug.current
+    }
   },
   images[]{
     _type,
@@ -94,6 +107,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   title,
   slug,
   description,
+  descriptionHTML,
   brand,
   reference,
   ean,
@@ -109,7 +123,12 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   "categories": categories[]->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentCategory": parentCategory->{
+      _id,
+      title,
+      "slug": slug.current
+    }
   },
   images[]{
     _type,
@@ -128,7 +147,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   meta
 }`
 
-const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && ($categorySlug in categories[]->slug.current || category == $categorySlug || $categorySlug in subcategories)] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -150,7 +169,12 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   "categories": categories[]->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentCategory": parentCategory->{
+      _id,
+      title,
+      "slug": slug.current
+    }
   },
   images[]{
     _type,
@@ -191,7 +215,12 @@ const featuredProductsQuery = `*[_type == "product" && status == "active" && fea
   "categories": categories[]->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentCategory": parentCategory->{
+      _id,
+      title,
+      "slug": slug.current
+    }
   },
   images[]{
     _type,
@@ -301,7 +330,12 @@ export async function searchProducts(query: string): Promise<Product[]> {
     "categories": categories[]->{
       _id,
       title,
-      "slug": slug.current
+      "slug": slug.current,
+      "parentCategory": parentCategory->{
+        _id,
+        title,
+        "slug": slug.current
+      }
     },
     images[]{
       _type,

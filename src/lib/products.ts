@@ -201,7 +201,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   createdAt
 }`
 
-const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && ($categorySlug in categories[]->slug.current || category == $categorySlug || $categorySlug in subcategories)] | order(sortOrder asc, title asc){
   _id,
   title,
   "slug": slug.current,
