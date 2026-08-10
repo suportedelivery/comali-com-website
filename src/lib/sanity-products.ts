@@ -302,6 +302,28 @@ export async function getAllCategories(): Promise<Category[]> {
   return sanityClient.fetch(categoryQuery)
 }
 
+export interface SubcategoryWithCount {
+  _id: string
+  title: string
+  slug: string
+  description: string | null
+  productCount: number
+}
+
+// Retorna as subcategorias de uma categoria-pai, com contagem de produtos ativos
+export async function getSubcategoriesWithCount(parentSlug: string): Promise<SubcategoryWithCount[]> {
+  const query = `*[_type == "category" && parentCategory->slug.current == $parentSlug] | order(title asc){
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "productCount": count(*[_type == "product" && status == "active" && ^._id in categories[]._ref])
+  }`
+  const results = await sanityClient.fetch(query, { parentSlug })
+  // Filtra subcategorias vazias para não mostrar cards sem produtos
+  return results.filter((s: SubcategoryWithCount) => s.productCount > 0)
+}
+
 export async function searchProducts(query: string): Promise<Product[]> {
   const searchQuery = `*[_type == "product" && status == "active" && (
     title match $query ||

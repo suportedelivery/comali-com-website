@@ -1,4 +1,4 @@
-import { getProductsByCategory, getAllCategories, getProductBySlug, getAllProducts } from "@/lib/sanity-products"
+import { getProductsByCategory, getAllCategories, getProductBySlug, getAllProducts, getSubcategoriesWithCount } from "@/lib/sanity-products"
 import { getProductBySlug as getProductDetails } from "@/lib/products"
 
 export const revalidate = 60
@@ -99,11 +99,99 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
   // 1-Level Route: /produtos/[categoria]
   if (slug.length === 1) {
     const catSlug = slug[0]
-    const products = await getProductsByCategory(catSlug)
     const category = categories.find((c) => c.slug.current === catSlug)
     const categoryTitle = category?.title || catSlug.replace(/-/g, " ").toUpperCase()
 
-    if (!category && products.length === 0) notFound()
+    if (!category) notFound()
+
+    // Verifica se a categoria tem subcategorias
+    const subcategories = await getSubcategoriesWithCount(catSlug)
+    const hasSubcategories = subcategories.length > 0
+
+    if (hasSubcategories) {
+      // Categoria-pai: mostra cards de subcategorias/segmentos
+      const totalProducts = subcategories.reduce((sum, s) => sum + s.productCount, 0)
+
+      return (
+        <div className="container mx-auto px-4 py-12 bg-slate-50 min-h-screen">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink render={<Link href="/produtos" />}>
+                  Produtos
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{categoryTitle}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
+          <div className="bg-slate-200 p-4 rounded-lg mb-8 border-l-4 border-blue-900">
+            <h1 className="text-4xl font-extrabold text-blue-900 uppercase tracking-wide">
+              {categoryTitle}
+            </h1>
+            <p className="text-sm text-slate-600 mt-1">
+              {totalProducts} produtos em {subcategories.length} segmentos
+            </p>
+          </div>
+
+          <p className="text-slate-600 mb-6 text-sm">
+            Selecione o segmento para ver os produtos específicos para o seu negócio:
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {subcategories.map((sub) => (
+              <Link
+                key={sub._id}
+                href={`/produtos/${catSlug}/${sub.slug}`}
+                className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-blue-400 hover:shadow-md"
+              >
+                <div>
+                  <h2 className="text-base font-bold text-slate-800 group-hover:text-blue-700 transition-colors capitalize">
+                    {sub.title}
+                  </h2>
+                  {sub.description && (
+                    <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                      {sub.description}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-full">
+                    {sub.productCount} produto{sub.productCount !== 1 ? "s" : ""}
+                  </span>
+                  <span className="text-blue-500 text-xs font-semibold group-hover:translate-x-1 transition-transform">
+                    Ver →
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-lg border border-dashed border-blue-200 bg-blue-50 p-6 text-center">
+            <p className="text-sm text-slate-600">
+              Não encontrou seu segmento? Entre em contato pelo WhatsApp.
+            </p>
+            <a
+              href={`https://wa.me/554130295878?text=${encodeURIComponent(`Olá! Gostaria de saber mais sobre ${categoryTitle}.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Consultar pelo WhatsApp
+            </a>
+          </div>
+        </div>
+      )
+    }
+
+    // Categoria-folha: sem subcategorias, mostra grid de produtos
+    const products = await getProductsByCategory(catSlug)
+
+    if (products.length === 0) notFound()
 
     return (
       <div className="container mx-auto px-4 py-12 bg-slate-50 min-h-screen">
@@ -130,32 +218,11 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
           </p>
         </div>
 
-        {products.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product._id} product={product} currentCategorySlug={catSlug} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-dashed p-12 text-center space-y-4">
-            <p className="text-muted-foreground">
-              Nenhum produto encontrado nesta categoria.
-            </p>
-            <Button
-              render={
-                <a
-                  href={getWhatsAppUrl(
-                    `Olá! Gostaria de saber mais sobre ${categoryTitle}.`
-                  )}
-                  target="_blank"
-                />
-              }
-            >
-              <MessageCircle className="mr-2 h-4 w-4" />
-              Consultar pelo WhatsApp
-            </Button>
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product._id} product={product} currentCategorySlug={catSlug} />
+          ))}
+        </div>
       </div>
     )
   }
