@@ -6,6 +6,13 @@ export default defineType({
   type: "document",
   fields: [
     defineField({
+      name: "active",
+      title: "Ativa",
+      type: "boolean",
+      initialValue: true,
+      description: "Desmarque para pausar esta categoria (e ocultar seus produtos no site sem alterá-los individualmente).",
+    }),
+    defineField({
       name: "title",
       title: "Nome da Categoria",
       type: "string",

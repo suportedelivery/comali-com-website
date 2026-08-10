@@ -51,6 +51,7 @@ export interface Category {
   slug: { current: string }
   description: string | null
   order: number
+  active: boolean
   parentCategory: { _id: string; title: string; slug: { current: string } } | null
 }
 
@@ -246,6 +247,7 @@ const categoryQuery = `*[_type == "category"] | order(order asc, title asc){
   slug,
   description,
   order,
+  active,
   "parentCategory": parentCategory->{
     _id,
     title,
@@ -311,8 +313,9 @@ export interface SubcategoryWithCount {
 }
 
 // Retorna as subcategorias de uma categoria-pai, com contagem de produtos ativos
+// Filtra apenas categorias ativas (active != false protege registros antigos sem o campo)
 export async function getSubcategoriesWithCount(parentSlug: string): Promise<SubcategoryWithCount[]> {
-  const query = `*[_type == "category" && parentCategory->slug.current == $parentSlug] | order(title asc){
+  const query = `*[_type == "category" && parentCategory->slug.current == $parentSlug && active != false] | order(order asc, title asc){
     _id,
     title,
     "slug": slug.current,
@@ -320,7 +323,7 @@ export async function getSubcategoriesWithCount(parentSlug: string): Promise<Sub
     "productCount": count(*[_type == "product" && status == "active" && ^._id in categories[]._ref])
   }`
   const results = await sanityClient.fetch(query, { parentSlug })
-  // Filtra subcategorias vazias para não mostrar cards sem produtos
+  // Filtra subcategorias vazias para não mostrar seções sem produtos
   return results.filter((s: SubcategoryWithCount) => s.productCount > 0)
 }
 

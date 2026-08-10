@@ -278,7 +278,8 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
     const parentCat = categories.find((c) => c.slug.current === segment1)
     const title = subcat?.title || segment2.replace(/-/g, " ").toUpperCase()
 
-    if (!subcat && products.length === 0) notFound()
+    // 404 se: não existe, está inativa, ou não tem produtos
+    if (!subcat || subcat.active === false || products.length === 0) notFound()
 
     return (
       <div className="container mx-auto px-4 py-12 bg-slate-50 min-h-screen">
