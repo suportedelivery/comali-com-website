@@ -109,8 +109,23 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
     const hasSubcategories = subcategories.length > 0
 
     if (hasSubcategories) {
-      // Categoria-pai: mostra cards de subcategorias/segmentos
-      const totalProducts = subcategories.reduce((sum, s) => sum + s.productCount, 0)
+      // Busca produtos por subcategoria e deduplica para evitar repetição
+      const seenIds = new Set<string>()
+      const sections = (
+        await Promise.all(
+          subcategories.map(async (sub) => {
+            const prods = await getProductsByCategory(sub.slug)
+            const unique = prods.filter((p) => {
+              if (seenIds.has(p._id)) return false
+              seenIds.add(p._id)
+              return true
+            })
+            return { subcategory: sub, products: unique }
+          })
+        )
+      ).filter((s) => s.products.length > 0)
+
+      const totalProducts = sections.reduce((sum, s) => sum + s.products.length, 0)
 
       return (
         <div className="container mx-auto px-4 py-12 bg-slate-50 min-h-screen">
@@ -133,56 +148,46 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
               {categoryTitle}
             </h1>
             <p className="text-sm text-slate-600 mt-1">
-              {totalProducts} produtos em {subcategories.length} segmentos
+              {totalProducts} produtos em {sections.length} segmentos
             </p>
           </div>
 
-          <p className="text-slate-600 mb-6 text-sm">
-            Selecione o segmento para ver os produtos específicos para o seu negócio:
-          </p>
+          <div className="space-y-12">
+            {sections.map(({ subcategory: sub, products }) => (
+              <section key={sub._id}>
+                {/* Cabeçalho da subcategoria */}
+                <div className="mb-4 flex items-center justify-between border-b-2 border-blue-900 pb-2">
+                  <Link
+                    href={`/produtos/${catSlug}/${sub.slug}`}
+                    className="group flex items-center gap-2 hover:text-blue-700 transition-colors"
+                  >
+                    <h2 className="text-lg font-bold text-blue-900 uppercase tracking-wide group-hover:text-blue-700">
+                      {sub.title}
+                    </h2>
+                    <span className="text-xs text-slate-500 font-normal normal-case">
+                      ({products.length} produto{products.length !== 1 ? "s" : ""})
+                    </span>
+                  </Link>
+                  <Link
+                    href={`/produtos/${catSlug}/${sub.slug}`}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors whitespace-nowrap"
+                  >
+                    Ver todos →
+                  </Link>
+                </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {subcategories.map((sub) => (
-              <Link
-                key={sub._id}
-                href={`/produtos/${catSlug}/${sub.slug}`}
-                className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-blue-400 hover:shadow-md"
-              >
-                <div>
-                  <h2 className="text-base font-bold text-slate-800 group-hover:text-blue-700 transition-colors capitalize">
-                    {sub.title}
-                  </h2>
-                  {sub.description && (
-                    <p className="mt-1 text-xs text-slate-500 line-clamp-2">
-                      {sub.description}
-                    </p>
-                  )}
+                {/* Grid de produtos */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product._id}
+                      product={product}
+                      currentCategorySlug={sub.slug}
+                    />
+                  ))}
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-full">
-                    {sub.productCount} produto{sub.productCount !== 1 ? "s" : ""}
-                  </span>
-                  <span className="text-blue-500 text-xs font-semibold group-hover:translate-x-1 transition-transform">
-                    Ver →
-                  </span>
-                </div>
-              </Link>
+              </section>
             ))}
-          </div>
-
-          <div className="mt-10 rounded-lg border border-dashed border-blue-200 bg-blue-50 p-6 text-center">
-            <p className="text-sm text-slate-600">
-              Não encontrou seu segmento? Entre em contato pelo WhatsApp.
-            </p>
-            <a
-              href={`https://wa.me/554130295878?text=${encodeURIComponent(`Olá! Gostaria de saber mais sobre ${categoryTitle}.`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Consultar pelo WhatsApp
-            </a>
           </div>
         </div>
       )
