@@ -25,8 +25,15 @@ Abre `http://localhost:3000` — dados do Sanity em tempo real, sem cache.
 ### 2. Enviar alterações pro site (deploy)
 
 git add .
-git commit -m "feat: menus dinamicos e integracao de produtos D&A no Sanity"
+git commit -m "feat: menus dinamicos e integracao de produtos D&A no Sanity - falta corrigir pasta PAI"
 git push origin master
+
+
+# 1. Verificar antes de enviar
+npm run typecheck
+
+# 2. Enviar para produção
+git add -A && git commit -m "menus dinamicos e integracao de produtos D&A no Sanity OK" && git push origin master
 
 
 

@@ -111,13 +111,17 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
     if (hasSubcategories) {
       // Busca produtos por subcategoria e deduplica para evitar repetição
       const seenIds = new Set<string>()
+      const seenTitles = new Set<string>()
       const sections = (
         await Promise.all(
           subcategories.map(async (sub) => {
             const prods = await getProductsByCategory(sub.slug)
             const unique = prods.filter((p) => {
-              if (seenIds.has(p._id)) return false
+              // Deduplica por ID e por título (produtos duplicados com IDs diferentes)
+              const titleKey = p.title.toLowerCase().trim()
+              if (seenIds.has(p._id) || seenTitles.has(titleKey)) return false
               seenIds.add(p._id)
+              seenTitles.add(titleKey)
               return true
             })
             return { subcategory: sub, products: unique }
