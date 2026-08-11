@@ -482,3 +482,46 @@ alias comali='cd /media/sdcloud/AppleSSD/Opencode/comali.com.br && ruflo hooks s
 ```
 
 Depois de adicionar ao `~/.bashrc`, use `source ~/.bashrc` e pronto — só digitar `comali` no terminal.
+
+---
+
+## Session Log (2026-08-11) — Consolidação de Produtos Duplicados (490 → 404)
+
+### Problema
+Produtos químicos D&A foram importados **1 cópia por categoria** (`product-da-c1p573`, `product-da-c3p573`, `product-da-c10p573`...), criando até 8 cópias do mesmo produto físico com refs diferentes. Produtos Tray também tinham pares de versões antigas/nova.
+
+### Auditoria
+- Script `audit-duplicados.py`: agrupa por título normalizado (uppercase, sem espaços duplos)
+- **Importante**: excluir `drafts.*` / `versions.*` do agrupamento — draft+published do MESMO documento NÃO é duplicata real
+- Resultado: 37 grupos, 123 produtos, 86 cópias excedentes
+- `check-dup-consistency.py`: verifica se as cópias de cada grupo têm dados idênticos (description, images, variations, price, stock) — 33 grupos consistentes (merge seguro), 4 divergentes (decisão manual)
+
+### Refs — Padrão Canônico
+- Químicos D&A vinham como `CMI-DA-C<codigoCategoria>P<numProduto>` (ex: `CMI-DA-C1P573`)
+- O `C1/C3/C10` era o código da **categoria de origem**; o número real do produto é o final (`P573`)
+- **Decisão do usuário**: adotar o mesmo padrão dos demais → `CMIP573` (ex: `CMIC700`, `CMICP120`)
+- Verificado: **0 conflitos** (nenhum `P###` duplicado pertence a produto diferente) e 0 colisões com refs existentes
+- Aplicado a **todos** os 101 químicos (33 dos grupos consolidados + 68 de cópia única)
+
+### Consolidação — `consolidate-duplicates.py`
+- `--dry-run` para plano, `--apply` para executar
+- Para cada grupo: mantém 1 doc (o de menor `_id`), mescla **todas** as categorias em `categories[]`, renomeia ref para `CMIP###`, deleta as cópias
+- Caso álcool (categoria `alcool-70` inativa): canônico `c11p7557`/`c11p781` mantidos; como a mescla inclui `category-da-alcool-70` (inativa), o produto **fica oculto do site** (regra: qualquer categoria inativa → some) — exatamente a decisão anterior
+- 4 grupos Tray divergentes: mantida a versão escolhida (`product-2017`, `product-2019`, `product-2193`, `product-2093`), deletadas as perdedoras (`product-121`, `product-123`, `product-1765`, `product-1789`)
+- Execução parcial (timeout de 120s no shell): rodar em 2 passos — primeiro `--apply` (faz os 33 patches + parte dos deletes), depois verificar o que restou e deletar com a API de mutate em lotes
+
+### Pós-Consolidação
+- Deletados 3 drafts órfãos (`drafts.product-da-c3p530/630/645`) de produtos deletados
+- Corrigida ref duplicada `CMILS52` (estava em 3 produtos DIFERENTES): `product-2085` → `CMI2085`, `product-2095` → `CMI2095` (padrão dos imports recentes: `CMI` + número do ID); `product-153` manteve `CMILS52`
+
+### Estado Final (Sanity production)
+- **404 produtos** publicados ativos (era 490)
+- **0 duplicatas por título**, **0 refs duplicadas**, 0 drafts órfãos
+- 101 refs químicas normalizadas para `CMIP###`
+
+### Regras para o Futuro
+- **Nunca importar** o mesmo produto 1x por categoria — um produto físico = 1 documento com `categories[]` contendo todas as categorias
+- Ao importar lotes, validar unicidade de `reference` e de título normalizado antes de criar
+- Ref de químico D&A: sempre `CMIP<num>` (sem prefixo de categoria)
+- Scripts de mutate no Sanity: usar batching (lotes de 10-20) em vez de chamadas individuais para evitar timeout; redirecionar output para arquivo (buffering) e conferir progresso parcial em caso de corte
+- `audit-duplicados.py` e `check-dup-consistency.py` podem ser reutilizados para auditar novos lotes antes do import
