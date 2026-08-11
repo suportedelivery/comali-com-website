@@ -228,40 +228,84 @@ git add -A && git commit -m "mensagem" && git push origin master
 
 ---
 
-## Session Log (2026-08-11) — Fix Product Card Hover Duplication
+## Session Log (2026-08-11) — Fix Product Duplication in Subcategories
 
 ### Problema
 Ao passar o mouse sobre produtos na categoria "produtos-quimicos-concentrados", os produtos estavam sendo duplicados visualmente. Ao navegar entre categorias (ex: Lixeiras e Contentores), os produtos duplicados apareciam também nas outras categorias. O problema ocorria apenas com hover (sem clicar), e cada vez que passava o mouse, duplicava ainda mais.
 
-### Causa Raiz
-O componente `ProductCard` estava marcado como `"use client"` desnecessariamente, causando re-renders no lado do cliente. Além disso, havia manipulação direta do DOM no handler `onError` da tag `<img>`, que executava `e.currentTarget.style.display = "none"` ao falhar o carregamento da imagem. Essa combinação de Client Component + manipulação direta do DOM causava problemas de renderização no React, resultando em duplicação visual dos elementos.
+### Causa Raiz (2 problemas encontrados)
+
+1. **Client Component desnecessário** (tentativa inicial de correção)
+   - O componente `ProductCard` estava marcado como `"use client"` sem necessidade
+   - Havia manipulação direta do DOM no handler `onError` da tag `<img>`
+   - Isso foi corrigido mas NÃO resolveu o problema principal
+
+2. **Produtos duplicados no Sanity** (causa real)
+   - Existem produtos com **mesmo título mas IDs diferentes** no Sanity
+   - Exemplos encontrados:
+     - "1000 PLUS SEM FRAGRANCIA" → 3 IDs diferentes (c1p537, c3p537, c6p537)
+     - "1000 PLUS TRADICIONAL" → 3 IDs diferentes (c1p534, c6p534, c7p534)
+     - "ALCOOL GEL 70% BB" → 4 IDs diferentes
+   - Todos com `sortOrder: 500` (valor padrão)
+   - Cada produto está em 2 categorias simultaneamente:
+     - Categoria PAI: "Produtos Químicos Concentrados"
+     - Subcategoria: "Hotelaria", "Food Service", etc.
+   - O código deduplicava por `_id`, mas não por `título`
+   - Resultado: múltiplas versões do mesmo produto apareciam na página
 
 ### Correções Feitas
 
 1. **Removido `"use client"` do ProductCard** (`src/components/product/product-card.tsx`)
-   - O componente não possui estado (`useState`), efeitos (`useEffect`), ou event handlers interativos
-   - O botão WhatsApp é apenas um link `<a>` — não precisa de JavaScript do lado do cliente
-   - Transformar em Server Component elimina re-renders desnecessários
+   - Commit `3f197c6`
+   - Não resolveu o problema principal, mas melhora a performance
 
-2. **Removido handler `onError` com manipulação direta do DOM**
-   - Antes: `onError={(e) => { e.currentTarget.style.display = "none" }}`
-   - Agora: imagem simplesmente não renderiza se `optimizedUrl` for nulo
-   - Manipulação direta de `style` em React pode causar inconsistências no Virtual DOM
+2. **Adicionada deduplicação por título** (`src/app/produtos/[...slug]/page.tsx`)
+   - Commit `89f9bdd`
+   - Antes: `if (seenIds.has(p._id)) return false`
+   - Agora: deduplica por ID **E** por título (normalizado em lowercase)
+   - Cria `seenTitles = new Set<string>()` para rastrear títulos já vistos
+   - Remove produtos com mesmo título, mesmo que tenham IDs diferentes
 
 ### Arquivos Alterados
-- `src/components/product/product-card.tsx` — removido `"use client"` e `onError` handler
+- `src/components/product/product-card.tsx` — removido `"use client"` e `onError`
+- `src/app/produtos/[...slug]/page.tsx` — deduplicação por título
 
-### Commit
+### Commits
 - `3f197c6` — "Fix: Remove 'use client' e onError do ProductCard para evitar duplicação de produtos no hover"
+- `89f9bdd` — "Fix: Deduplicação por título além de ID para evitar produtos duplicados"
 
 ### Deploy
 - Push para `master` → Vercel auto-deploy
 - URL: https://comali.com.br e https://comali-com-br.vercel.app
 
+### Problema de Dados no Sanity
+**IMPORTANTE:** O Sanity contém produtos duplicados que precisam ser limpos:
+- Buscar todos os produtos com `sortOrder: 500` que têm títulos duplicados
+- Decidir qual versão manter (provavelmente a com referência correta)
+- Deletar as duplicatas
+- Atualizar `sortOrder` dos produtos restantes conforme `REVISÃO_CORRIGIDO.csv`
+
 ### Regra para o Futuro
-- Só usar `"use client"` quando realmente necessário (estado, efeitos, event handlers interativos)
-- Evitar manipulação direta do DOM (`element.style.xxx`) em componentes React
-- Preferir renderização condicional (`{condition && <Component />}`) ao invés de `display: none`
+- Deduplicar por título + ID ao listar produtos (proteção contra duplicatas)
+- Limpar produtos duplicados no Sanity antes de importar novos lotes
+- Validar `sortOrder` ao importar (nunca deixar todos em 500)
+- Só usar `"use client"` quando realmente necessário
+
+### Problema Resolvido — Renumeração sortOrder dos product-da-*
+Os 183 produtos `product-da-*` (inseridos APÓS as revisões CSV, sem catalogação de sortOrder) estavam todos com `sortOrder: 500`, o que causava empate na ordenação (`order(sortOrder asc, title asc)` não tinha critério de desempate entre eles).
+
+**Solução:** script `renumber-sortorder-500.py` atribuiu sequência única (9500 → 9682) ordenada por título, começando acima do maior sortOrder existente (9430 dos drafts) para não colidir.
+
+```bash
+python3 renumber-sortorder-500.py --dry-run   # ver plano
+python3 renumber-sortorder-500.py --apply     # aplicar no Sanity
+```
+
+**Resultado:** 0 produtos ativos com `sortOrder: 500`; 183 renumerados (9500–9682).
+
+### Regra Adicional
+- Ao importar novos lotes de produtos fora do fluxo das revisões CSV, sempre atribuir `sortOrder` (ou renumeração sequencial no final) — nunca deixar em 500 (default)
+- `product-da-*` = produtos químicos concentrados importados depois das revisões CSV
 
 ---
 
