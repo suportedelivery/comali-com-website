@@ -1,5 +1,3 @@
-"use client"
-
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -62,21 +60,18 @@ export function ProductCard({ product, currentCategorySlug }: ProductCardProps) 
     <Card className="group overflow-hidden transition-all hover:shadow-lg border border-gray-200 hover:border-gray-300 bg-white">
       <Link href={linkHref}>
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 p-4">
-{optimizedUrl ? (
-              <img
-                src={optimizedUrl}
-                alt={product.title}
-                onError={(e) => {
-                  e.currentTarget.style.display = "none"
-                }}
-                className="h-full w-full object-contain transition-transform group-hover:scale-105"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground">
-                Sem imagem
-              </div>
-            )}
+          {optimizedUrl ? (
+            <img
+              src={optimizedUrl}
+              alt={product.title}
+              className="h-full w-full object-contain transition-transform group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              Sem imagem
+            </div>
+          )}
           {product.featured && (
             <Badge className="absolute top-2 left-2">Destaque</Badge>
           )}
