@@ -228,6 +228,43 @@ git add -A && git commit -m "mensagem" && git push origin master
 
 ---
 
+## Session Log (2026-08-11) — Fix Product Card Hover Duplication
+
+### Problema
+Ao passar o mouse sobre produtos na categoria "produtos-quimicos-concentrados", os produtos estavam sendo duplicados visualmente. Ao navegar entre categorias (ex: Lixeiras e Contentores), os produtos duplicados apareciam também nas outras categorias. O problema ocorria apenas com hover (sem clicar), e cada vez que passava o mouse, duplicava ainda mais.
+
+### Causa Raiz
+O componente `ProductCard` estava marcado como `"use client"` desnecessariamente, causando re-renders no lado do cliente. Além disso, havia manipulação direta do DOM no handler `onError` da tag `<img>`, que executava `e.currentTarget.style.display = "none"` ao falhar o carregamento da imagem. Essa combinação de Client Component + manipulação direta do DOM causava problemas de renderização no React, resultando em duplicação visual dos elementos.
+
+### Correções Feitas
+
+1. **Removido `"use client"` do ProductCard** (`src/components/product/product-card.tsx`)
+   - O componente não possui estado (`useState`), efeitos (`useEffect`), ou event handlers interativos
+   - O botão WhatsApp é apenas um link `<a>` — não precisa de JavaScript do lado do cliente
+   - Transformar em Server Component elimina re-renders desnecessários
+
+2. **Removido handler `onError` com manipulação direta do DOM**
+   - Antes: `onError={(e) => { e.currentTarget.style.display = "none" }}`
+   - Agora: imagem simplesmente não renderiza se `optimizedUrl` for nulo
+   - Manipulação direta de `style` em React pode causar inconsistências no Virtual DOM
+
+### Arquivos Alterados
+- `src/components/product/product-card.tsx` — removido `"use client"` e `onError` handler
+
+### Commit
+- `3f197c6` — "Fix: Remove 'use client' e onError do ProductCard para evitar duplicação de produtos no hover"
+
+### Deploy
+- Push para `master` → Vercel auto-deploy
+- URL: https://comali.com.br e https://comali-com-br.vercel.app
+
+### Regra para o Futuro
+- Só usar `"use client"` quando realmente necessário (estado, efeitos, event handlers interativos)
+- Evitar manipulação direta do DOM (`element.style.xxx`) em componentes React
+- Preferir renderização condicional (`{condition && <Component />}`) ao invés de `display: none`
+
+---
+
 ## Google Ads — Workflow de Importação
 
 ### Estrutura do Gerador (`gerar-csv-template.py`)
