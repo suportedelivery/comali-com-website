@@ -379,6 +379,40 @@ python3 fix-da-descriptions.py --apply     # aplicar no Sanity
 
 ---
 
+---
+
+## Session Log (2026-08-11) — Remove Texto "Curitiba e Região Metropolitana" de 12 Produtos
+
+### Problema
+Produtos legados da Tray continham menções à restrição regional de venda em 2 campos do Sanity:
+- **`descriptionHTML`**: "Produto vendido apenas para Curitiba e Região Metropolitana" (químicos, em `<strong>`) e "SOMENTE PARA CURITIBA E REGIÃO METROPOLITANA" (tapetes, linha em `<p><span>`)
+- **`description`** (texto plano): mesma frase — alimenta `<meta name="description">` e RSC payload
+
+### Correção — `remove-curitiba-notes.py`
+- Remove parágrafos `<p>...</p>` inteiros com "SOMENTE PARA CURITIBA"
+- Remove a frase "Produto vendido apenas para Curitiba e Região Metropolitana" (com "ã" puro ou entidade `&atilde;`/`&Atilde;`)
+- Limpa resíduos: `<strong>` vazios, `<br />` no fim de `<p>`, `<p>` vazios
+- Limpa o campo texto plano (`clean_plain`) com regex idêntico + normalização de espaços duplos
+- Preserva "* Imagem meramente ilustrativa"
+- `--dry-run` para plano, `--apply` para aplicar
+
+### Aplicação
+- 12/12 produtos corrigidos (desc. química + 7 tapetes) em `descriptionHTML` E `description`
+- Verificado published: 0 documentos com a frase; página ao vivo limpa após ISR ~3min
+
+### Lições
+1. **A frase existe em 2 campos**: `descriptionHTML` (renderizado) e `description` (texto plano p/ meta description). Corrigir só o HTML deixa a página suja via meta/RSC — sempre verificar ambos
+2. **Falsos positivos**: "curitiba" também aparece nas `meta.keywords` de SEO (ex: "machfloss curitiba", "biovis curitiba") — não remover; buscar pela frase completa
+3. **Entidades HTML**: acentos podem estar em texto puro ou `&atilde;`/`&Atilde;`/`&Atilde;` — usar regex que cobre as 3 formas
+
+### Comandos
+```bash
+python3 remove-curitiba-notes.py --dry-run   # ver plano
+python3 remove-curitiba-notes.py --apply     # aplicar no Sanity
+```
+
+---
+
 ## Session Log (2026-08-11) — Fix Fundo Branco/Texto Preto em Produtos Legados Tray
 
 ### Problema
