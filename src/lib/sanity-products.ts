@@ -55,7 +55,10 @@ export interface Category {
   parentCategory: { _id: string; title: string; slug: { current: string } } | null
 }
 
-const productQuery = `*[_type == "product" && status == "active"] | order(sortOrder asc, title asc){
+// Produtos cujo produto tenha QUALQUER categoria inativa (active == false) são ocultados do site
+const activeCategoriesFilter = `count(coalesce(categories, [])[_ref in *[_type == "category" && active == false]._id]) == 0`
+
+const productQuery = `*[_type == "product" && status == "active" && ${activeCategoriesFilter}] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -102,7 +105,7 @@ const productQuery = `*[_type == "product" && status == "active"] | order(sortOr
   meta
 }`
 
-const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
+const productBySlugQuery = `*[_type == "product" && slug.current == $slug && ${activeCategoriesFilter}][0]{
   _id,
   _type,
   title,
@@ -148,7 +151,7 @@ const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0]{
   meta
 }`
 
-const productsByCategoryQuery = `*[_type == "product" && status == "active" && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
+const productsByCategoryQuery = `*[_type == "product" && status == "active" && ${activeCategoriesFilter} && $categorySlug in categories[]->slug.current] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -194,7 +197,7 @@ const productsByCategoryQuery = `*[_type == "product" && status == "active" && $
   meta
 }`
 
-const featuredProductsQuery = `*[_type == "product" && status == "active" && featured == true] | order(sortOrder asc, title asc){
+const featuredProductsQuery = `*[_type == "product" && status == "active" && ${activeCategoriesFilter} && featured == true] | order(sortOrder asc, title asc){
   _id,
   _type,
   title,
@@ -328,7 +331,7 @@ export async function getSubcategoriesWithCount(parentSlug: string): Promise<Sub
 }
 
 export async function searchProducts(query: string): Promise<Product[]> {
-  const searchQuery = `*[_type == "product" && status == "active" && (
+  const searchQuery = `*[_type == "product" && status == "active" && ${activeCategoriesFilter} && (
     title match $query ||
     description match $query ||
     brand match $query ||
