@@ -377,8 +377,45 @@ python3 fix-da-descriptions.py --apply     # aplicar no Sanity
 
 ---
 
-## Sessão e Memória
+---
 
+## Session Log (2026-08-11) — Fix Fundo Branco/Texto Preto em Produtos Legados Tray
+
+### Problema
+Na página de produto do ESPUMA CLOR (e outros produtos legados da Tray), partes da descrição apareciam com **fundo branco e texto preto** sobre o dark theme (`bg-slate-900 text-white` + `prose prose-invert` do `product-detail-client.tsx:139-150`). Causa: `descriptionHTML` herdado da Tray contém estilos inline que forçam `background-color: #ffffff` e `color: #000000` / `color: rgb(40, 40, 40)`.
+
+### Detecção
+- 495 produtos têm `descriptionHTML`; 19 tinham estilos claros problemáticos
+- Padrões problemáticos: `background-color: #ffffff`, `color: #000000`, `color: #000`, `color: rgb(40,40,40)`, `color: rgb(0,0,0)`
+- **Não confundir** com cores intencionais da tabela de coleta seletiva: `background-color:#000000` (Preto/Madeira), `#FFFF00` (Amarelo), `#0000FF` etc.
+
+### Correção — `fix-tray-description-colors.py`
+- Remove **somente** `background-color` branco (regex exato `(?:#[fF]{6}|#[fF]{3}|[fF]{6}|[fF]{3})(?![0-9a-fA-F])` com lookahead para não danificar `#FFFF00`)
+- Converte **cor de texto** escura → `color: #fff` usando lookbehind `(?<!background-)` para nunca alterar `background-color:#000000` legítimo da coleta seletiva
+- Preserva o restante do style intacto (sem remover `;` finais)
+- `--dry-run` para plano, `--apply` para aplicar
+
+### Aplicação
+- 2 rodadas: 19 produtos (cores de texto) + 2 ESPUMA CLOR (1L/5L, bg branco)
+- Verificado no Sanity (published) e na página ao vivo (após ISR ~60s + hard refresh)
+
+### Lições (bugs durante o processo)
+1. **Regex parcial**: `background-color:\s*#?[fF]{3,5}?` casava `#FFFF` de `#FFFF00` (coleta seletiva) e deixava `00` quebrado → usar lookahead `(?![0-9a-fA-F])`
+2. **`color` dentro de `background-color`**: `re.sub(r'color:\s*#000000', ...)` também casava o sufixo de `background-color:#000000` (legítimo) → usar lookbehind `(?<!background-)`
+3. **Cache da página**: mudanças no Sanity demoram ~60s+ para refletir na Vercel (ISR); usar `curl -H "Cache-Control: no-cache" "?x=$RANDOM"` para validar
+
+### Arquivos
+- `fix-tray-description-colors.py` — script de correção de estilos inline legados
+
+### Comandos
+```bash
+python3 fix-tray-description-colors.py --dry-run   # ver plano
+python3 fix-tray-description-colors.py --apply     # aplicar no Sanity
+```
+
+---
+
+## Sessão e Memória
 ### Inicializar ruflo (primeira vez no projeto):
 ```
 ruflo init
