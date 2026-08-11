@@ -341,6 +341,42 @@ Para evitar erros e avisos de validação no Google Ads Editor (como problemas d
 
 ---
 
+## Session Log (2026-08-11) — Fix Descrições Produtos Químicos D&A
+
+### Problema
+Os 183 produtos `product-da-*` (químicos D&A) tinham a seção "Indicação" do `descriptionHTML` com bullets extras incorretos ("Todos tipos de superfícies e pisos laváveis", "Limpeza manual de utensílios", "Panelas", "Vidros", "Talheres") que vinham de um **placeholder comentado** no HTML do site D&A (`<!-- <ul>... -->`). Em 16 produtos faltavam bullets legítimos (ex: INTER PLUS, SANYX, ALUMEX). Além disso, a seção "Apresentação" deveria ser removida (decisão comercial).
+
+### Causa Raiz
+O site `deaquimica.com.br` carrega cada produto em um `<div class="modal">` com duas listas de indicação: a **ul real** (correta) e uma **ul comentada** (placeholder do template Thymeleaf). O scraper anterior capturou o conteúdo do comentário como indicação real, adicionando bullets genéricos em todos os produtos.
+
+### Correção Feita
+1. **Baixado HTML completo** de `https://www.deaquimica.com.br/` (777KB, 183 modals)
+2. **Extraído canônico** com BeautifulSoup (`da_produtos_canonico.json`): descrição, Indicação, Fragrância, Cor, Diluição, Apresentação, Documentos Técnicos
+3. **Script `fix-da-descriptions.py`**:
+   - Substitui a lista de Indicação **inteira** pelos bullets canônicos (corrige tanto os extras quanto os faltantes)
+   - Remove a seção Apresentação (`<h3>Apresentação</h3>` + `<ul>`)
+   - Preserva parágrafo, Fragrância/Cor/Diluição e Documentos Técnicos
+4. **Aplicado** 183 patches no Sanity (8 lotes de 25) — 183/183 ok
+5. **Verificado** no Sanity: BLOCK 50, FLASH COMBAT, INTER PLUS com indicações corretas
+
+### Regras para o Futuro
+- HTML comentado (`<!-- ... -->`) **nunca** deve ser usado como fonte de dados — remover comentários antes de parsear (`re.sub(r'<!--.*?-->', '', html)`)
+- Usar BeautifulSoup em vez de regex para extrair seções de HTML malformado (o site D&A fecha `<p>` com `</div>`)
+- Ao scraper produtos, sempre comparar com fonte canônica antes de aplicar em lote
+
+### Arquivos
+- `fix-da-descriptions.py` — script de correção (--dry-run / --apply)
+- `da_produtos_canonico.json` — dados canônicos extraídos do site D&A
+- `da_sanity_atuais.json` — snapshot dos dados antes da correção
+
+### Comandos
+```bash
+python3 fix-da-descriptions.py --dry-run   # ver plano
+python3 fix-da-descriptions.py --apply     # aplicar no Sanity
+```
+
+---
+
 ## Sessão e Memória
 
 ### Inicializar ruflo (primeira vez no projeto):
