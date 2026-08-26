@@ -19,6 +19,7 @@ export const siteConfig = {
   trayStoreId: "746334",
   nav: [
     { title: "Início", href: "/" },
+    { title: "Soluções por Segmento", href: "/segmentos" },
     { title: "Produtos", href: "/produtos" },
     { title: "Sobre", href: "/sobre" },
     { title: "Contato", href: "/contato" },
