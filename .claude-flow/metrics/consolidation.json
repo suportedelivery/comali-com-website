@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-16T06:29:55.965Z",
+  "timestamp": "2026-08-12T01:32:13.369Z",
   "distillationEnabled": true,
   "patternsConsolidated": 0,
   "memoryCleaned": 0,
@@ -10,7 +10,8 @@
   "promoted": 0,
   "byProvenance": {},
   "namespaces": [
-    "default"
+    "default",
+    "session"
   ],
   "dryRun": false,
   "corrupt": false
