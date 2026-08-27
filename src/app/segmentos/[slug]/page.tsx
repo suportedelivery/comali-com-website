@@ -20,7 +20,7 @@ interface Segment {
   icon: string | null
   whatsappMessage: string | null
   illustrativeImage: { asset: { url: string }; alt: string | null } | null
-  featuredProducts: Product[] | null
+  produtosDoSegmento: Product[]
   meta: { title: string; description: string; keywords: string | null } | null
 }
 
@@ -36,12 +36,13 @@ const segmentQuery = `*[_type == "segment" && slug.current == $slug && status ==
     asset->{url},
     alt
   },
-  "featuredProducts": featuredProducts[]->{
+  "produtosDoSegmento": *[_type == "product" && references(^._id)] | order(sortOrder asc, title asc){
     _id,
     _type,
     title,
     slug,
     description,
+    descriptionHTML,
     brand,
     reference,
     ean,
@@ -190,21 +191,27 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
         </div>
       </section>
 
-      {/* Featured Products */}
-      {segment.featuredProducts && segment.featuredProducts.length > 0 && (
-        <section className="pb-16 md:pb-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-8 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Produtos em Destaque
-            </h2>
+      {/* Produtos deste segmento */}
+      <section className="pb-16 md:pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-2xl font-bold text-slate-900 sm:text-3xl">
+            Produtos recomendados para este segmento
+          </h2>
+          {segment.produtosDoSegmento.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {segment.featuredProducts.map((product) => (
+              {segment.produtosDoSegmento.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+              <p className="text-lg text-slate-500">
+                Em breve novos produtos para este segmento.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
