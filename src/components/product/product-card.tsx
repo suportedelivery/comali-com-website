@@ -90,7 +90,11 @@ export function ProductCard({ product, currentCategorySlug }: ProductCardProps) 
           <h3 className="mt-1 font-semibold leading-tight line-clamp-2">
             {product.title}
           </h3>
-
+          {product.description && (
+            <p className="mt-1 text-sm text-slate-600 line-clamp-2">
+              {product.description}
+            </p>
+          )}
         </CardContent>
       </Link>
       <div className="px-4 pb-4">
