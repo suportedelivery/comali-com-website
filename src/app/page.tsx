@@ -6,7 +6,7 @@ export const revalidate = 60
 import { Button } from "@/components/ui/button"
 import { CategoryGrid } from "@/components/catalog/category-grid"
 import { ProductCard } from "@/components/product/product-card"
-import { EnvironmentsSection } from "@/components/home/environments-section"
+
 import { getAllProducts, getFeaturedProducts } from "@/lib/sanity-products"
 import { sanityClient } from "@/lib/sanity"
 import { siteConfig } from "@/lib/config"
@@ -342,8 +342,6 @@ export default async function Home() {
           </div>
         </section>
       )}
-
-      <EnvironmentsSection />
 
       {/* Por que escolher */}
       <section className="container mx-auto px-4 py-16">
