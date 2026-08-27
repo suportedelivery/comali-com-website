@@ -91,7 +91,7 @@ export function ProductCard({ product, currentCategorySlug }: ProductCardProps) 
             {product.title}
           </h3>
           {product.description && (
-            <p className="mt-1 text-sm text-slate-600 line-clamp-2">
+            <p className="mt-1 text-sm text-sky-700 font-medium line-clamp-2">
               {product.description}
             </p>
           )}
