@@ -90,6 +90,18 @@ export async function Header() {
                 {item.title}
               </Link>
             ))}
+            <Link
+              href="/solucoes/food-service"
+              className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary hover:bg-slate-100 rounded transition-colors"
+            >
+              Food Service
+            </Link>
+            <Link
+              href="/solucoes/nutricionistas"
+              className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary hover:bg-slate-100 rounded transition-colors"
+            >
+              Nutricionistas
+            </Link>
           </nav>
         </div>
       </div>
