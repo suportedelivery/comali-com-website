@@ -84,6 +84,19 @@ export default defineType({
       ],
     }),
     defineField({
+      name: "featuredProductsCurated",
+      title: "Produtos em Destaque (ordem personalizada)",
+      type: "array",
+      description:
+        "Selecione e ordene os produtos que aparecerão primeiro no segmento. Se vazio, o sistema mostra todos os produtos do segmento automaticamente.",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "product" }],
+        },
+      ],
+    }),
+    defineField({
       name: "featuredProducts",
       title: "Produtos em Destaque",
       type: "array",

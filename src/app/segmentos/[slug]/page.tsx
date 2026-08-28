@@ -20,8 +20,62 @@ interface Segment {
   icon: string | null
   whatsappMessage: string | null
   illustrativeImage: { asset: { url: string }; alt: string | null } | null
-  featuredProducts: Product[] | null
+  produtosDoSegmento: Product[]
   meta: { title: string; description: string; keywords: string | null } | null
+}
+
+interface ProductWithParent extends Product {
+  categoryParents: string[]
+}
+
+interface CategoryGroup {
+  name: string
+  products: ProductWithParent[]
+}
+
+const QUIMICOS_PARENT = "Produtos Químicos Concentrados"
+
+function isChemical(p: ProductWithParent): boolean {
+  if (p.categoryParents.includes(QUIMICOS_PARENT)) return true
+  return false
+}
+
+function isGroupChemical(products: ProductWithParent[]): boolean {
+  return products.some(isChemical)
+}
+
+function groupProducts(products: ProductWithParent[]): CategoryGroup[] {
+  const map = new Map<string, ProductWithParent[]>()
+
+  for (const p of products) {
+    const catName =
+      (p as unknown as { categories?: Array<{ title?: string }> })
+        .categories?.[0]?.title || "Outros"
+    const list = map.get(catName) || []
+    list.push(p)
+    map.set(catName, list)
+  }
+
+  for (const list of map.values()) {
+    list.sort(
+      (a, b) =>
+        (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+        a.title.localeCompare(b.title)
+    )
+  }
+
+  const groups: CategoryGroup[] = Array.from(map.entries()).map(
+    ([name, prods]) => ({ name, products: prods })
+  )
+
+  groups.sort((a, b) => {
+    const aChem = isGroupChemical(a.products)
+    const bChem = isGroupChemical(b.products)
+    if (aChem !== bChem) return aChem ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
+
+  return groups
 }
 
 const segmentQuery = `*[_type == "segment" && slug.current == $slug && status == "active"][0]{
@@ -36,12 +90,13 @@ const segmentQuery = `*[_type == "segment" && slug.current == $slug && status ==
     asset->{url},
     alt
   },
-  "featuredProducts": featuredProducts[]->{
+  "produtosDoSegmento": *[_type == "product" && references(^._id)] | order(sortOrder asc, title asc){
     _id,
     _type,
     title,
     slug,
     description,
+    descriptionHTML,
     brand,
     reference,
     ean,
@@ -65,6 +120,7 @@ const segmentQuery = `*[_type == "segment" && slug.current == $slug && status ==
         "slug": slug.current
       }
     },
+    "categoryParents": categories[]->parentCategory->title,
     images[]{ _type, asset->{url}, alt },
     "externalImages": externalImages[],
     hasVariations,
@@ -190,21 +246,47 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
         </div>
       </section>
 
-      {/* Featured Products */}
-      {segment.featuredProducts && segment.featuredProducts.length > 0 && (
-        <section className="pb-16 md:pb-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-8 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Produtos em Destaque
-            </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {segment.featuredProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
+      {/* Produtos deste segmento */}
+      <section className="pb-16 md:pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-2xl font-bold text-slate-900 sm:text-3xl">
+            Catálogo completo
+          </h2>
+          {segment.produtosDoSegmento.length > 0 ? (
+            (() => {
+              const products = segment.produtosDoSegmento.map((p) => ({
+                ...p,
+                categoryParents:
+                  (p as unknown as { categoryParents?: string[] })
+                    .categoryParents || [],
+              })) as ProductWithParent[]
+              const groups = groupProducts(products)
+              return (
+                <div className="space-y-10">
+                  {groups.map((group) => (
+                    <div key={group.name}>
+                      <h3 className="mb-4 text-lg font-semibold text-slate-800">
+                        {group.name}
+                      </h3>
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {group.products.map((product) => (
+                          <ProductCard key={product._id} product={product} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+              <p className="text-lg text-slate-500">
+                Em breve novos produtos para este segmento.
+              </p>
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
     </div>
   )
 }
