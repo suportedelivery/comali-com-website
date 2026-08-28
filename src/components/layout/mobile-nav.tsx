@@ -13,7 +13,9 @@ interface MobileNavProps {
 
 export function MobileNav({ nav }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const navItems = nav && nav.length > 0 ? nav : siteConfig.nav
+  const navItems = (nav && nav.length > 0 ? nav : siteConfig.nav).filter(
+    (item) => item.href !== "/segmentos"
+  )
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -53,6 +55,20 @@ export function MobileNav({ nav }: MobileNavProps) {
               {item.title}
             </Link>
           ))}
+          <Link
+            href="/solucoes/food-service"
+            onClick={() => setIsOpen(false)}
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Food Service
+          </Link>
+          <Link
+            href="/solucoes/nutricionistas"
+            onClick={() => setIsOpen(false)}
+            className="text-lg font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Nutricionistas
+          </Link>
 
           <Link
             href="/contato"

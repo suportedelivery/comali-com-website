@@ -81,15 +81,29 @@ export async function Header() {
       <div className="hidden md:block border-t bg-white">
         <div className="container mx-auto px-4">
           <nav className="flex items-center gap-6 h-10 text-sm font-medium text-slate-600 border-b border-slate-100">
-            {siteConfig.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="hover:text-primary transition-colors"
-              >
-                {item.title}
-              </Link>
-            ))}
+            {customNav
+              .filter((item) => item.href !== "/segmentos")
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="hover:text-primary transition-colors"
+                >
+                  {item.title}
+                </Link>
+              ))}
+            <Link
+              href="/solucoes/food-service"
+              className="hover:text-primary transition-colors"
+            >
+              Food Service
+            </Link>
+            <Link
+              href="/solucoes/nutricionistas"
+              className="hover:text-primary transition-colors"
+            >
+              Nutricionistas
+            </Link>
           </nav>
           <MegaMenu categories={menuCategories} productsByCategory={productsByCategory} />
         </div>
