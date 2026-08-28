@@ -41,7 +41,7 @@ export default async function SegmentsPage() {
   return (
     <div>
       {/* Hero Header */}
-      <section className="bg-slate-900 py-16 md:py-20">
+      <section className="scroll-mt-40 bg-slate-900 py-16 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Encontre a solução para sua empresa
