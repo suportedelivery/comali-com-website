@@ -14,37 +14,48 @@ const client = createClient({
 
 const FORCE = process.env.FORCE === "1"
 
-// ── Mapeamento categoria → segmentos ──────────────────────────────────
-const categoryToSegments: Record<string, string[]> = {
-  "produtos-quimicos-concentrados": [
-    "panificadoras-e-confeitarias",
-    "restaurantes-e-food-service",
-    "acougues-e-industrias-de-alimentos",
-    "hospitais-clinicas-e-laboratorios",
-    "empresas-condominios-e-industrias",
-    "escolas",
-  ],
-  "lixeiras-e-contentores": [
-    "construtoras-e-obras",
-    "restaurantes-e-food-service",
-    "hospitais-clinicas-e-laboratorios",
-    "empresas-condominios-e-industrias",
-    "escolas",
-  ],
-  dispensers: [
-    "panificadoras-e-confeitarias",
-    "restaurantes-e-food-service",
-    "hospitais-clinicas-e-laboratorios",
-    "empresas-condominios-e-industrias",
-    "escolas",
-  ],
-  "equipamentos-de-limpeza": [
-    "construtoras-e-obras",
-    "restaurantes-e-food-service",
-    "hospitais-clinicas-e-laboratorios",
-    "empresas-condominios-e-industrias",
-    "escolas",
-  ],
+interface CategoryRule {
+  match: string[]
+  segments: string[]
+}
+
+const categoryRules: CategoryRule[] = [
+  {
+    match: ["food service", "cozinha", "restaurantes"],
+    segments: [
+      "restaurantes-e-food-service",
+      "panificadoras-e-confeitarias",
+      "acougues-e-industrias-de-alimentos",
+    ],
+  },
+  {
+    match: ["hospitalar", "saúde", "hospital"],
+    segments: ["hospitais-clinicas-e-laboratorios"],
+  },
+  {
+    match: ["educacional", "escola", "educação"],
+    segments: ["escolas"],
+  },
+  {
+    match: ["automotiva", "veículos", "carros"],
+    segments: ["higiene-automotiva"],
+  },
+  {
+    match: ["construção", "obras", "industrial"],
+    segments: ["construtoras-e-obras", "empresas-condominios-e-industrias"],
+  },
+  {
+    match: ["limpeza", "higiene", "profissional"],
+    segments: ["empresas-condominios-e-industrias", "escolas"],
+  },
+]
+
+function normalize(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
 }
 
 interface SanityRef {
@@ -63,8 +74,49 @@ interface SanitySegment {
   slug: string
 }
 
+function computeSegments(
+  product: SanityProduct,
+  slugToId: Map<string, string>
+): Array<{ _key: string; _type: "reference"; _ref: string }> | null {
+  const segmentSlugs = new Set<string>()
+
+  if (product.categories) {
+    for (const cat of product.categories) {
+      const catNorm = normalize(cat.title)
+      for (const rule of categoryRules) {
+        if (rule.match.some((m) => catNorm.includes(m))) {
+          for (const s of rule.segments) {
+            segmentSlugs.add(s)
+          }
+        }
+      }
+    }
+  }
+
+  const titleUpper = (product.title || "").toUpperCase()
+  if (titleUpper.includes("LIXEIRA") || titleUpper.includes("CONTENTOR")) {
+    segmentSlugs.add("construtoras-e-obras")
+  }
+  if (titleUpper.includes("DISPENSER")) {
+    segmentSlugs.add("hospitais-clinicas-e-laboratorios")
+    segmentSlugs.add("empresas-condominios-e-industrias")
+    segmentSlugs.add("escolas")
+  }
+
+  if (segmentSlugs.size === 0) return null
+
+  const refs = Array.from(segmentSlugs)
+    .filter((slug) => slugToId.has(slug))
+    .map((slug, idx) => ({
+      _key: `seg-${idx}`,
+      _type: "reference" as const,
+      _ref: slugToId.get(slug)!,
+    }))
+
+  return refs.length > 0 ? refs : null
+}
+
 async function main() {
-  // 1. Carregar segmentos
   const segments: SanitySegment[] = await client.fetch(
     `*[_type == "segment" && status == "active"]{ _id, "slug": slug.current }`
   )
@@ -72,7 +124,6 @@ async function main() {
 
   console.log(`\n📋 ${segments.length} segmentos carregados\n`)
 
-  // 2. Carregar produtos
   const products: SanityProduct[] = await client.fetch(
     `*[_type == "product"]{
       _id,
@@ -84,64 +135,24 @@ async function main() {
 
   console.log(`📦 ${products.length} produtos carregados\n`)
 
-  // 3. Processar cada produto
-  let tagged = 0
+  // Build batch mutations
+  const mutations: object[] = []
+  const meta: Array<{ title: string; names: string }> = []
 
   for (const product of products) {
-    // Pular se já tem segments (a menos que FORCE=1)
     if (!FORCE && product.segments && product.segments.length > 0) {
       continue
     }
 
-    const segmentSlugs = new Set<string>()
+    const refs = computeSegments(product, slugToId)
+    if (!refs) continue
 
-    // Regras por categoria
-    if (product.categories) {
-      for (const cat of product.categories) {
-        const catSlug = cat.title
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim()
-
-        for (const [ruleSlug, segmentSlugsList] of Object.entries(
-          categoryToSegments
-        )) {
-          if (catSlug.includes(ruleSlug) || ruleSlug.includes(catSlug)) {
-            for (const s of segmentSlugsList) {
-              segmentSlugs.add(s)
-            }
-          }
-        }
-      }
-    }
-
-    // Regra extra: título contém "CONTENTOR" ou "LIXEIRA"
-    const titleUpper = (product.title || "").toUpperCase()
-    if (titleUpper.includes("CONTENTOR") || titleUpper.includes("LIXEIRA")) {
-      segmentSlugs.add("construtoras-e-obras")
-    }
-
-    if (segmentSlugs.size === 0) continue
-
-    // Montar array de referências
-    const refs = Array.from(segmentSlugs)
-      .filter((slug) => slugToId.has(slug))
-      .map((slug, idx) => ({
-        _key: `seg-${idx}`,
-        _type: "reference" as const,
-        _ref: slugToId.get(slug)!,
-      }))
-
-    if (refs.length === 0) continue
-
-    // Patch no Sanity
-    await client
-      .patch(product._id)
-      .set({ segments: refs })
-      .commit()
-
-    tagged++
+    mutations.push({
+      patch: {
+        id: product._id,
+        set: { segments: refs },
+      },
+    })
 
     const names = refs
       .map((r) => {
@@ -150,10 +161,27 @@ async function main() {
       })
       .join(", ")
 
-    console.log(`  ✔ ${product.title} → segmentos: ${names}`)
+    meta.push({ title: product.title, names })
   }
 
-  console.log(`\n✅ ${tagged} produtos marcados com sucesso!\n`)
+  if (mutations.length === 0) {
+    console.log("✅ Nenhum produto para atualizar")
+    return
+  }
+
+  console.log(`\n🔄 Enviando ${mutations.length} mutações em lotes de 20...\n`)
+
+  const BATCH = 20
+  for (let i = 0; i < mutations.length; i += BATCH) {
+    const batch = mutations.slice(i, i + BATCH)
+    const batchMeta = meta.slice(i, i + BATCH)
+    await client.mutate(batch)
+    for (const m of batchMeta) {
+      console.log(`  ✔ ${m.title} → ${m.names}`)
+    }
+  }
+
+  console.log(`\n✅ ${mutations.length} produtos marcados com sucesso!\n`)
 }
 
 main().catch((err) => {

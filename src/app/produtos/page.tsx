@@ -11,9 +11,30 @@ export const metadata = {
     "Catálogo de produtos de limpeza profissional: dispensers, lixeiras, carrinhos de limpeza e acessórios.",
 }
 
+const MAIN_PARENTS = [
+  "Produtos Químicos Concentrados",
+  "Dispensers",
+  "Equipamentos de Limpeza",
+  "Lixeiras e Contentores",
+]
+
 export default async function ProdutosPage() {
   const products = await getAllProducts()
-  const categories = await getAllCategories()
+  const allCategories = await getAllCategories()
+
+  const roots = allCategories.filter((c) => !c.parentCategory)
+
+  const seenSlugs = new Set<string>()
+  const mainRoots = roots.filter((c) => {
+    if (!MAIN_PARENTS.includes(c.title)) return false
+    if (seenSlugs.has(c.slug.current)) return false
+    seenSlugs.add(c.slug.current)
+    return true
+  })
+
+  const otherRoots = roots
+    .filter((c) => !seenSlugs.has(c.slug.current))
+    .sort((a, b) => a.title.localeCompare(b.title))
 
   return (
     <div className="container mx-auto px-4 py-12 bg-slate-50 min-h-screen">
@@ -28,15 +49,30 @@ export default async function ProdutosPage() {
 
       <div className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Categorias</h2>
-        <div className="flex flex-wrap gap-2">
-          {categories.slice(0, 20).map((cat) => (
-            <Link key={cat.slug.current} href={`/produtos/${cat.slug.current}`}>
-              <Button variant="outline" size="sm">
-                {cat.title}
-              </Button>
-            </Link>
-          ))}
-        </div>
+
+        {mainRoots.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            {mainRoots.map((cat) => (
+              <Link key={cat.slug.current} href={`/produtos/${cat.slug.current}`}>
+                <Button variant="default" size="sm" className="bg-cyan-600 hover:bg-cyan-700 text-white">
+                  {cat.title}
+                </Button>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {otherRoots.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {otherRoots.map((cat) => (
+              <Link key={cat.slug.current} href={`/produtos/${cat.slug.current}`}>
+                <Button variant="outline" size="sm">
+                  {cat.title}
+                </Button>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

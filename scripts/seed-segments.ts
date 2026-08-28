@@ -148,6 +148,19 @@ const segments: SegmentData[] = [
     imageAlt: "Escola com coleta seletiva e equipamentos de limpeza",
     imageSearchQuery: "school cleaning recycling bins",
   },
+  {
+    title: "Higiene Automotiva",
+    slug: "higiene-automotiva",
+    subtitle: "Produtos químicos profissionais para lava jatos, oficinas e garagens",
+    description:
+      "Linha completa de produtos químicos para limpeza interna, externa, polimento e higienização de veículos.",
+    icon: "🚗",
+    whatsappMessage: "QUERO CONHECER A LINHA AUTOMOTIVA",
+    order: 8,
+    status: "active",
+    imageAlt: "Veículo sendo higienizado com produtos profissionais automotivos",
+    imageSearchQuery: "car wash cleaning professional automotive",
+  },
 ]
 
 async function seedSegments() {
@@ -182,7 +195,7 @@ async function seedSegments() {
     try {
       // illustrativeImage é criada sem asset — o upload deve ser feito manualmente no Studio
       // Veja as instruções ao final deste script
-      const doc = {
+      const doc: Record<string, unknown> = {
         _type: "segment",
         title: segment.title,
         slug: { _type: "slug", current: segment.slug },
@@ -192,12 +205,8 @@ async function seedSegments() {
         whatsappMessage: segment.whatsappMessage,
         order: segment.order,
         status: segment.status,
-        illustrativeImage: {
-          _type: "image",
-          asset: { _type: "reference", _ref: "" },
-          alt: segment.imageAlt,
-        },
       }
+      // illustrativeImage é criada sem asset — o upload deve ser feito manualmente no Studio
 
       const result = await client.create(doc)
       console.log(
