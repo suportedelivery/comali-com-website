@@ -24,8 +24,44 @@ interface Segment {
   meta: { title: string; description: string; keywords: string | null } | null
 }
 
-interface ProductWithParent extends Product {
+interface ProductWithParent {
+  _id: string
+  _type: "product"
+  title: string
+  slug: { current: string }
+  description: string | null
+  descriptionHTML?: string | null
+  brand: string | null
+  reference: string | null
+  ean: string | null
+  price: number | null
+  stock: number
+  availability: string | null
+  warranty: string | null
+  weight: number | null
+  dimensions: { length: number | null; width: number | null; height: number | null } | null
+  sortOrder: number
+  featured: boolean
+  new: boolean
+  status: string
+  categories: Array<{
+    _id: string
+    title: string
+    slug: string | { current: string }
+    parent?: string
+    parentCategory?: { title: string; slug: { current: string } }
+  }>
   categoryParents: string[]
+  images: Array<{
+    _type: string
+    asset: { url: string }
+    alt: string | null
+  }>
+  externalImages: any[]
+  hasVariations: boolean
+  variations: any[]
+  whatsappMessage: string | null
+  meta: { title: string; description: string; keywords: string | null } | null
 }
 
 interface CategoryGroup {
@@ -37,6 +73,12 @@ const QUIMICOS_PARENT = "Produtos Químicos Concentrados"
 
 function isChemical(p: ProductWithParent): boolean {
   if (p.categoryParents.includes(QUIMICOS_PARENT)) return true
+  if (p.categories) {
+    for (const cat of p.categories) {
+      if (cat.title === QUIMICOS_PARENT) return true
+      if (cat.parentCategory?.title === QUIMICOS_PARENT) return true
+    }
+  }
   return false
 }
 
@@ -48,12 +90,19 @@ function groupProducts(products: ProductWithParent[]): CategoryGroup[] {
   const map = new Map<string, ProductWithParent[]>()
 
   for (const p of products) {
-    const catName =
-      (p as unknown as { categories?: Array<{ title?: string }> })
-        .categories?.[0]?.title || "Outros"
-    const list = map.get(catName) || []
-    list.push(p)
-    map.set(catName, list)
+    const cats = p.categories
+    if (cats && cats.length > 0) {
+      for (const cat of cats) {
+        const catName = cat.title || "Outros"
+        const list = map.get(catName) || []
+        list.push(p)
+        map.set(catName, list)
+      }
+    } else {
+      const list = map.get("Outros") || []
+      list.push(p)
+      map.set("Outros", list)
+    }
   }
 
   for (const list of map.values()) {
@@ -259,8 +308,14 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
                 categoryParents:
                   (p as unknown as { categoryParents?: string[] })
                     .categoryParents || [],
-              })) as ProductWithParent[]
+              })) as unknown as ProductWithParent[]
               const groups = groupProducts(products)
+              console.log("[SEGMENTO DEBUG] slug:", slug)
+              groups.forEach((g) => {
+                console.log(
+                  `[SEGMENTO GRUPO] "${g.name}" | químico: ${isGroupChemical(g.products)} | ${g.products.length} produtos`
+                )
+              })
               return (
                 <div className="space-y-10">
                   {groups.map((group) => (
@@ -270,7 +325,7 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
                       </h3>
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {group.products.map((product) => (
-                          <ProductCard key={product._id} product={product} />
+                          <ProductCard key={product._id} product={product as unknown as Product} />
                         ))}
                       </div>
                     </div>

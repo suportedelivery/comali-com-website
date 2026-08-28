@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, Grid3X3 } from "lucide-react"
 
 interface CategoryProduct {
   title: string
@@ -76,6 +76,13 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
             )}
           </Link>
         ))}
+        <Link
+          href="/segmentos"
+          className="flex items-center gap-1.5 px-4 py-3 text-base font-extrabold uppercase tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ml-auto"
+        >
+          <Grid3X3 className="h-4 w-4" />
+          Soluções por Segmento
+        </Link>
       </nav>
 
       {activeCat && (
