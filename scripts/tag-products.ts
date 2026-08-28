@@ -136,7 +136,7 @@ async function main() {
   console.log(`📦 ${products.length} produtos carregados\n`)
 
   // Build batch mutations
-  const mutations: object[] = []
+  const mutations: Array<{ patch: { id: string; set: Record<string, unknown> } }> = []
   const meta: Array<{ title: string; names: string }> = []
 
   for (const product of products) {
