@@ -310,12 +310,6 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
                     .categoryParents || [],
               })) as unknown as ProductWithParent[]
               const groups = groupProducts(products)
-              console.log("[SEGMENTO DEBUG] slug:", slug)
-              groups.forEach((g) => {
-                console.log(
-                  `[SEGMENTO GRUPO] "${g.name}" | químico: ${isGroupChemical(g.products)} | ${g.products.length} produtos`
-                )
-              })
               return (
                 <div className="space-y-10">
                   {groups.map((group) => (

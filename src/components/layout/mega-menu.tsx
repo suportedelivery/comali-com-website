@@ -76,13 +76,13 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
             )}
           </Link>
         ))}
-        <Link
+        <a
           href="/segmentos"
           className="flex items-center gap-1.5 px-4 py-3 text-base font-extrabold uppercase tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ml-auto"
         >
           <Grid3X3 className="h-4 w-4" />
           Soluções por Segmento
-        </Link>
+        </a>
       </nav>
 
       {activeCat && (
