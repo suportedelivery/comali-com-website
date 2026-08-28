@@ -195,7 +195,7 @@ async function seedSegments() {
     try {
       // illustrativeImage é criada sem asset — o upload deve ser feito manualmente no Studio
       // Veja as instruções ao final deste script
-      const doc: Record<string, unknown> = {
+      const doc = {
         _type: "segment",
         title: segment.title,
         slug: { _type: "slug", current: segment.slug },
@@ -206,7 +206,6 @@ async function seedSegments() {
         order: segment.order,
         status: segment.status,
       }
-      // illustrativeImage é criada sem asset — o upload deve ser feito manualmente no Studio
 
       const result = await client.create(doc)
       console.log(
