@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
 import { getSiteNavigation } from "@/lib/navigation"
+import { WhatsAppLink } from "@/components/contact/whatsapp-link"
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
@@ -67,15 +68,10 @@ export async function Footer() {
             <h4 className="text-sm font-semibold text-white">Contato</h4>
             <div className="flex flex-col gap-2">
               {siteConfig.whatsapp.number && (
-                <a
-                  href={`https://wa.me/${siteConfig.whatsapp.number}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-slate-400 hover:text-cyan-400 transition-colors"
-                >
+                <WhatsAppLink source="footer" className="flex items-center gap-2 text-sm text-slate-400 hover:text-cyan-400 transition-colors">
                   <Phone className="h-4 w-4" />
                   WhatsApp
-                </a>
+                </WhatsAppLink>
               )}
               <a
                 href={`mailto:${siteConfig.email}`}

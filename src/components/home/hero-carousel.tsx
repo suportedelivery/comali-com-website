@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { getWhatsAppUrl, trackWhatsappClick } from "@/lib/whatsapp";
 import type { Product } from "@/lib/sanity-products";
 
 interface HeroCarouselProps {
@@ -131,6 +131,7 @@ export function HeroCarousel({ featuredProducts = [], allProducts = [] }: HeroCa
                       href={getWhatsAppUrl()}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackWhatsappClick("hero")}
                       className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-white/30 bg-white/10 text-white hover:bg-white/20 h-12 px-6 py-2"
                     >
                       Fale Conosco
@@ -195,6 +196,7 @@ export function HeroCarousel({ featuredProducts = [], allProducts = [] }: HeroCa
                       href={getWhatsAppUrl()}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackWhatsappClick("hero")}
                       className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-white/30 bg-white/10 text-white hover:bg-white/20 h-12 px-6 py-2"
                     >
                       Fale Conosco

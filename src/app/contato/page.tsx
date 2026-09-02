@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/config"
-import { getWhatsAppUrl } from "@/lib/whatsapp"
+import { WhatsAppLink } from "@/components/contact/whatsapp-link"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, Phone, Mail, MapPin } from "lucide-react"
 import { ContactForm } from "@/components/contact/contact-form"
@@ -25,15 +25,13 @@ export default function ContatoPage() {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Informações</h2>
               <div className="space-y-3">
-                <a
-                  href={getWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <WhatsAppLink
+                  source="contato_info"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Phone className="h-5 w-5" />
                   <span>WhatsApp</span>
-                </a>
+                </WhatsAppLink>
                 <a
                   href={`mailto:${siteConfig.email}`}
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
@@ -60,15 +58,10 @@ export default function ContatoPage() {
                 WhatsApp.
               </p>
               <Button className="bg-green-600 hover:bg-green-700">
-                <a
-                  href={getWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
+                <WhatsAppLink source="contato_cta" className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
                   Abrir WhatsApp
-                </a>
+                </WhatsAppLink>
               </Button>
             </div>
           </div>

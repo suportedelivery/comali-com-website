@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ImageGallery } from "@/components/product/image-gallery"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, Ruler } from "lucide-react"
-import { getWhatsAppUrl } from "@/lib/whatsapp"
+import { WhatsAppLink } from "@/components/contact/whatsapp-link"
 
 interface Variation {
   id: string
@@ -124,14 +124,18 @@ export function ProductDetailClient({ product }: { product: ProductData }) {
           <div className="pt-2">
             <Button
               render={
-                <a href={getWhatsAppUrl(whatsappMessage)} target="_blank" />
+                <WhatsAppLink
+                  message={whatsappMessage}
+                  source="product_detail"
+                  extraProps={{ "data-product-reference": product.reference }}
+                >
+                  <MessageCircle className="mr-2 h-5 w-5 animate-pulse" />
+                  Solicitar Orçamento via WhatsApp
+                </WhatsAppLink>
               }
               size="sm"
               className="w-full bg-green-600 hover:bg-green-700 text-white text-sm h-10 py-2 font-bold shadow-sm"
-            >
-              <MessageCircle className="mr-2 h-5 w-5 animate-pulse" />
-              Solicitar Orçamento via WhatsApp
-            </Button>
+            />
           </div>
         </div>
       </div>

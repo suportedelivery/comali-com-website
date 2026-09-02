@@ -4,7 +4,10 @@ import "./globals.css"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { WhatsAppButton } from "@/components/contact/whatsapp-button"
+import { GoogleTagManager } from "@/components/analytics/google-tag-manager"
 import { siteConfig } from "@/lib/config"
+
+const GTM_ID = "GTM-M9HHG8"
 
 const inter = Inter({
   variable: "--font-sans",
@@ -43,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body className="min-h-screen flex flex-col antialiased">
+        <GoogleTagManager gtmId={GTM_ID} />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

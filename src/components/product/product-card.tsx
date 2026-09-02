@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { getWhatsAppUrl } from "@/lib/whatsapp"
+import { WhatsAppLink } from "@/components/contact/whatsapp-link"
 import type { Product } from "@/lib/sanity-products"
 
 interface ProductCardProps {
@@ -96,19 +96,18 @@ export function ProductCard({ product, currentCategorySlug }: ProductCardProps) 
       <div className="px-4 pb-4">
         <Button
           render={
-            <a
-              href={getWhatsAppUrl(
-                `Olá! Gostaria de solicitar um orçamento para: ${product.reference ? `${product.reference}: ` : ""}${product.title}`,
-                product.title
-              )}
-              target="_blank"
-            />
+            <WhatsAppLink
+              message={`Olá! Gostaria de solicitar um orçamento para: ${product.reference ? `${product.reference}: ` : ""}${product.title}`}
+              productName={product.title}
+              source="product_card"
+              extraProps={{ "data-product-reference": product.reference, "data-category": categoryName }}
+            >
+              Solicitar Orçamento
+            </WhatsAppLink>
           }
           className="w-full"
           size="sm"
-        >
-          Solicitar Orçamento
-        </Button>
+        />
       </div>
     </Card>
   )
