@@ -4,7 +4,7 @@ import { getWhatsAppUrl } from "@/lib/whatsapp"
 import { ProductCard } from "@/components/product/product-card"
 import type { Product } from "@/lib/sanity-products"
 
-export const revalidate = 60
+export const revalidate = 1800
 
 export const metadata: Metadata = {
   title: "Soluções para Nutricionistas | COMALI",

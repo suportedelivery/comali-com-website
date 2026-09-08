@@ -2,7 +2,7 @@ import Link from "next/link"
 import fs from "fs"
 import path from "path"
 
-export const revalidate = 60
+export const revalidate = 1800
 import { Button } from "@/components/ui/button"
 import { CategoryGrid } from "@/components/catalog/category-grid"
 import { ProductCard } from "@/components/product/product-card"

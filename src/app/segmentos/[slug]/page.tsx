@@ -5,7 +5,7 @@ import { getWhatsAppUrl } from "@/lib/whatsapp"
 import { ProductCard } from "@/components/product/product-card"
 import type { Product } from "@/lib/sanity-products"
 
-export const revalidate = 60
+export const revalidate = 1800
 
 interface SegmentPageProps {
   params: Promise<{ slug: string }>
@@ -139,7 +139,7 @@ const segmentQuery = `*[_type == "segment" && slug.current == $slug && status ==
     asset->{url},
     alt
   },
-  "produtosDoSegmento": *[_type == "product" && references(^._id)] | order(sortOrder asc, title asc){
+  "produtosDoSegmento": *[_type == "product" && status == "active" && references(^._id)] | order(sortOrder asc, title asc){
     _id,
     _type,
     title,

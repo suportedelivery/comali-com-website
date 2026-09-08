@@ -1,7 +1,7 @@
 import { getProductsByCategory, getAllCategories, getProductBySlug, getAllProducts, getSubcategoriesWithCount } from "@/lib/sanity-products"
 import { getProductBySlug as getProductDetails } from "@/lib/products"
 
-export const revalidate = 60
+export const revalidate = 1800
 import { ProductCard } from "@/components/product/product-card"
 import { notFound } from "next/navigation"
 import Link from "next/link"

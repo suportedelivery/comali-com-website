@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Atendemos empresas que precisam de produtos profissionais, alto rendimento e soluções para ambientes de grande circulação.",
 }
 
-export const revalidate = 60
+export const revalidate = 1800
 
 interface Segment {
   _id: string
