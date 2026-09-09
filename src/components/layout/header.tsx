@@ -77,7 +77,36 @@ export async function Header() {
       </div>
 
 
-      {/* Navigation bar with mega menu */}
+      {/* Nav items bar (desktop) */}
+      <div className="hidden md:block border-t bg-slate-50">
+        <div className="container mx-auto px-4">
+          <nav className="flex items-center gap-1">
+            {customNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary hover:bg-slate-100 rounded transition-colors"
+              >
+                {item.title}
+              </Link>
+            ))}
+            <Link
+              href="/solucoes/food-service"
+              className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary hover:bg-slate-100 rounded transition-colors"
+            >
+              Food Service
+            </Link>
+            <Link
+              href="/solucoes/nutricionistas"
+              className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary hover:bg-slate-100 rounded transition-colors"
+            >
+              Nutricionistas
+            </Link>
+          </nav>
+        </div>
+      </div>
+
+      {/* Category mega menu (desktop) */}
       <div className="hidden md:block border-t bg-white">
         <div className="container mx-auto px-4">
           <MegaMenu categories={menuCategories} productsByCategory={productsByCategory} />

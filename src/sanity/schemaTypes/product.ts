@@ -65,6 +65,19 @@ export default defineType({
       ],
     }),
     defineField({
+      name: "segments",
+      title: "Segmentos de Público",
+      type: "array",
+      description:
+        "Segmentos para os quais este produto é recomendado (pode marcar mais de um).",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "segment" }],
+        },
+      ],
+    }),
+    defineField({
       name: "brand",
       title: "Marca",
       type: "string",

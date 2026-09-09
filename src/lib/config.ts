@@ -19,7 +19,10 @@ export const siteConfig = {
   trayStoreId: "746334",
   nav: [
     { title: "Início", href: "/" },
+    { title: "Soluções por Segmento", href: "/segmentos" },
     { title: "Produtos", href: "/produtos" },
+    { title: "Food Service", href: "/solucoes/food-service" },
+    { title: "Nutricionistas", href: "/solucoes/nutricionistas" },
     { title: "Sobre", href: "/sobre" },
     { title: "Contato", href: "/contato" },
   ],
