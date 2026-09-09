@@ -46,8 +46,8 @@ async function syncSheet() {
   })
 
   // Buscar categorias e segmentos existentes
-  const allCategories = await client.fetch(`*[_type == "category"]{ _id, title, slug.current }`)
-  const allSegments = await client.fetch(`*[_type == "segment"]{ _id, title, slug.current }`)
+  const allCategories = await client.fetch(`*[_type == "category"]{ _id, title, "slug": slug.current }`)
+  const allSegments = await client.fetch(`*[_type == "segment"]{ _id, title, "slug": slug.current }`)
 
   // Mapear títulos → _ref
   const categoryMap = new Map<string, string>()
