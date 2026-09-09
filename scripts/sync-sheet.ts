@@ -35,11 +35,14 @@ async function syncSheet() {
   console.log(`🚀 Iniciando sincronização planilha → Sanity (DRY-RUN${apply ? " + APPLY" : ""})\n`)
 
   // Ler CSV
+  console.log("Lendo CSV: scripts/sheet-input.csv (delimitador: vírgula)")
   const csvContent = readFileSync("scripts/sheet-input.csv", "utf8")
   const products: SheetProduct[] = parse(csvContent, {
-    delimiter: ";",
+    delimiter: ",",
     columns: true,
     skip_empty_lines: true,
+    relax_quotes: true,
+    relax_column_count: true,
   })
 
   // Buscar categorias e segmentos existentes
