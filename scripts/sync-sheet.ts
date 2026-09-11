@@ -15,6 +15,8 @@ interface SheetProduct {
   title: string
   brand: string | null
   description: string | null
+  descriptionHTML: string | null
+  externalImages: string | null
   status: string | null
   categories: string[]
   segments: string[]
@@ -26,6 +28,20 @@ interface SheetProduct {
   stock: string | null
   availability: string | null
   whatsappMessage: string | null
+}
+
+function parseExternalImages(pipeSeparated: string | null | undefined, title: string): Array<{ _type: string; _key: string; url: string; alt: string }> {
+  if (!pipeSeparated || !pipeSeparated.trim()) return []
+  return pipeSeparated
+    .split("|")
+    .map((url) => url.trim())
+    .filter(Boolean)
+    .map((url, i) => ({
+      _type: "image" as const,
+      _key: `ext-${i}`,
+      url,
+      alt: title || "Imagem do produto",
+    }))
 }
 
 async function syncSheet() {
@@ -67,6 +83,8 @@ async function syncSheet() {
       title,
       brand,
       description,
+      descriptionHTML,
+      externalImages[]{url, alt},
       status,
       "categories": categories[]->title,
       "segments": segments[]->title,
@@ -182,12 +200,22 @@ async function syncSheet() {
           ? row.status?.toLowerCase().trim()
           : "active"
 
-      await client.create({
+      // descriptionHTML: use from CSV; fallback: wrap description in <p>
+      const descriptionHTML =
+        row.descriptionHTML?.trim() ||
+        (row.description ? `<p>${row.description}</p>` : null)
+
+      // externalImages: parse pipe-separated URLs
+      const externalImages = parseExternalImages(row.externalImages, row.title)
+
+      const created = await client.create({
         _type: "product",
         title: row.title,
         status,
         brand: row.brand || null,
         description: row.description || null,
+        descriptionHTML: descriptionHTML || null,
+        externalImages,
         ean: row.ean || null,
         reference: row.reference || null,
         dimensions: row.dimensions || null,
@@ -200,7 +228,7 @@ async function syncSheet() {
         segments: segmentsRefs,
       })
 
-      console.log(`✅ Criado: ${row.title}`)
+      console.log(`✅ ${row.title} -> _id: ${created._id}`)
     } catch (error) {
       console.error(`❌ Erro ao criar ${row.title}:`, error)
     }
@@ -238,6 +266,22 @@ async function syncSheet() {
       if (row.availability !== existing.availability) patch.availability = row.availability || null
       if (row.whatsappMessage !== existing.whatsappMessage)
         patch.whatsappMessage = row.whatsappMessage || null
+
+      // descriptionHTML: use from CSV; fallback: wrap description in <p>
+      const newDescriptionHTML =
+        row.descriptionHTML?.trim() ||
+        (row.description ? `<p>${row.description}</p>` : null)
+      if ((newDescriptionHTML || null) !== (existing.descriptionHTML || null)) {
+        patch.descriptionHTML = newDescriptionHTML || null
+      }
+
+      // externalImages: parse pipe-separated URLs
+      const newExternalImages = parseExternalImages(row.externalImages, row.title)
+      const existingExtUrls = (existing.externalImages || []).map((e: any) => e.url).join("|")
+      const newExtUrls = newExternalImages.map((e) => e.url).join("|")
+      if (newExtUrls !== existingExtUrls) {
+        patch.externalImages = newExternalImages
+      }
 
       // Categorias
       const categoriesRefs = row.categories
