@@ -18,8 +18,8 @@ interface SheetProduct {
   descriptionHTML: string | null
   externalImages: string | null
   status: string | null
-  categories: string[]
-  segments: string[]
+  categories: any
+  segments: any
   ean: string | null
   reference: string | null
   dimensions: string | null
@@ -28,6 +28,17 @@ interface SheetProduct {
   stock: string | null
   availability: string | null
   whatsappMessage: string | null
+}
+
+function normalizeToArray(v: any): string[] {
+  if (!v) return []
+  if (Array.isArray(v)) return v
+  if (typeof v === "string")
+    return v
+      .split("|")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  return []
 }
 
 function parseExternalImages(pipeSeparated: string | null | undefined, title: string): Array<{ _type: string; _key: string; url: string; alt: string }> {
@@ -168,7 +179,7 @@ async function syncSheet() {
     if (row._id || !row.title) continue
 
     try {
-      const categoriesRefs = row.categories
+      const categoriesRefs = normalizeToArray(row.categories)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = categoryMap.get(c.trim().toLowerCase())
@@ -180,7 +191,7 @@ async function syncSheet() {
         })
         .filter(Boolean)
 
-      const segmentsRefs = row.segments
+      const segmentsRefs = normalizeToArray(row.segments)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = segmentMap.get(c.trim().toLowerCase())
@@ -284,7 +295,7 @@ async function syncSheet() {
       }
 
       // Categorias
-      const categoriesRefs = row.categories
+      const categoriesRefs = normalizeToArray(row.categories)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = categoryMap.get(c.trim().toLowerCase())
@@ -301,7 +312,7 @@ async function syncSheet() {
       }
 
       // Segmentos
-      const segmentsRefs = row.segments
+      const segmentsRefs = normalizeToArray(row.segments)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = segmentMap.get(c.trim().toLowerCase())
