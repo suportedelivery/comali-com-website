@@ -37,6 +37,17 @@ interface SheetProduct {
   whatsappMessage: string | null
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+}
+
 function normalizeToArray(v: any): string[] {
   if (!v) return []
   if (Array.isArray(v)) return v
@@ -185,6 +196,9 @@ async function syncSheet() {
   for (const row of products) {
     if (row._id || !row.title) continue
 
+    const slug = slugify(row.title)
+    const docId = `product-${slug}`
+
     try {
       const categoriesRefs = normalizeToArray(row.categories)
         .filter((c) => c.trim())
@@ -226,9 +240,11 @@ async function syncSheet() {
       // externalImages: parse pipe-separated URLs
       const externalImages = parseExternalImages(row.externalImages, row.title)
 
-      const created = await client.create({
+      const payload = {
+        _id: docId,
         _type: "product",
         title: row.title,
+        slug: { _type: "slug", current: slug },
         status,
         brand: row.brand || null,
         description: row.description || null,
@@ -244,11 +260,19 @@ async function syncSheet() {
         whatsappMessage: row.whatsappMessage || null,
         categories: categoriesRefs,
         segments: segmentsRefs,
-      })
+      }
 
+      console.log(`\n📦 Payload para criar "${row.title}":`)
+      console.log(JSON.stringify(payload, null, 2))
+
+      const created = await client.create(payload)
       console.log(`✅ ${row.title} -> _id: ${created._id}`)
-    } catch (error) {
-      console.error(`❌ Erro ao criar ${row.title}:`, error)
+    } catch (error: any) {
+      console.error(`\n❌ Erro ao criar "${row.title}"`)
+      console.error(`   _id tentado: ${docId}`)
+      console.error(`   Erro: ${error.message || error}`)
+      if (error.details) console.error(`   Detalhes:`, JSON.stringify(error.details, null, 2))
+      if (error.response) console.error(`   Response:`, JSON.stringify(error.response, null, 2))
     }
   }
 
