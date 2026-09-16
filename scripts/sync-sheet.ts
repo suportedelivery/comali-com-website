@@ -1,6 +1,13 @@
 import { createClient } from "@sanity/client"
 import { readFileSync } from "fs"
 import { parse } from "csv-parse/sync"
+import { config as dotenvConfig } from "dotenv"
+
+dotenvConfig({ path: ".env.local" })
+
+const tokenCheck = process.env.SANITY_API_TOKEN || "(NAO CARREGADO)"
+console.log("🔑 Token Sanity:", tokenCheck.substring(0, 10) + "..." + tokenCheck.substring(tokenCheck.length - 5))
+console.log("📁 Arquivo .env.local carregado:", require("path").resolve(".env.local"))
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "5fcrgo8n",
