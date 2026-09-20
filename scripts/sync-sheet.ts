@@ -73,6 +73,53 @@ function parseExternalImages(pipeSeparated: string | null | undefined, title: st
     }))
 }
 
+function normalizeValue(val: any, fieldName: string): any {
+  if (val === null || val === undefined || val === "") return ""
+
+  if (fieldName === "status") {
+    return String(val).toLowerCase().trim()
+  }
+
+  if (fieldName === "descriptionHTML") {
+    return String(val)
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase()
+  }
+
+  if (Array.isArray(val)) {
+    const cleaned = val.map((item) => {
+      if (typeof item === "object" && item !== null) {
+        const copy: any = {}
+        for (const k of Object.keys(item).sort()) {
+          if (["_key", "_rev", "_updatedAt", "_createdAt", "_system", "_type", "_id"].includes(k)) continue
+          copy[k] = normalizeValue(item[k], k)
+        }
+        return copy
+      }
+      return typeof item === "string" ? item.trim().toLowerCase() : item
+    })
+    cleaned.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+    return JSON.stringify(cleaned)
+  }
+
+  if (typeof val === "object" && val !== null) {
+    const copy: any = {}
+    for (const k of Object.keys(val).sort()) {
+      if (["_key", "_rev", "_updatedAt", "_createdAt", "_system", "_type", "_id"].includes(k)) continue
+      copy[k] = normalizeValue(val[k], k)
+    }
+    return JSON.stringify(copy)
+  }
+
+  if (typeof val === "string") {
+    return val.trim()
+  }
+
+  return String(val).trim()
+}
+
 async function syncSheet() {
   const args = process.argv.slice(2)
   const apply = args.includes("--apply")
@@ -139,36 +186,105 @@ async function syncSheet() {
   let toUpdate = 0
   let statusChanged = 0
   const warnings: string[] = []
+  const statusReportLines: string[] = []
+  const updateReportItems: { title: string; diffs: { field: string; sheetVal: string; sanityVal: string }[] }[] = []
+
+  const fieldsToCheck = [
+    "title", "brand", "description", "descriptionHTML", "status",
+    "ean", "reference", "dimensions", "warranty", "weight", "stock",
+    "availability", "whatsappMessage", "externalImages", "categories", "segments"
+  ]
 
   // Processar cada linha do CSV
   for (const row of products) {
     const title = (row.title || "").toLowerCase().trim()
-    const existing = sanityMap.get(title)
+    if (!title) continue
 
-    if (!row._id && title) {
-      // Criar novo produto
+    let existing = null
+    if (row._id) {
+      existing = sanityProducts.find((p: any) => p._id === row._id)
+    }
+    if (!existing) {
+      existing = sanityMap.get(title)
+    }
+
+    if (!existing) {
       toCreate++
-    } else if (existing && row._id === existing._id) {
-      // Atualizar existente
-      toUpdate++
+      continue
+    }
 
-      // Verificar mudanças em campos-chave
-      if (row.status !== undefined && row.status !== null) {
-        const normalizedStatus = row.status.toLowerCase().trim()
-        const targetStatus =
-          normalizedStatus === "inactive" || normalizedStatus === "inativo"
-            ? "discontinued"
-            : normalizedStatus === "active" || normalizedStatus === "draft" || normalizedStatus === "discontinued"
-            ? normalizedStatus
-            : "active"
+    // Status alvo
+    const normalizedStatus = (row.status || "").toLowerCase().trim()
+    const targetStatus =
+      normalizedStatus === "inactive" || normalizedStatus === "inativo"
+        ? "discontinued"
+        : ["active", "draft", "discontinued"].includes(normalizedStatus)
+        ? normalizedStatus
+        : "active"
 
-        if (targetStatus !== existing.status) {
-          statusChanged++
-        }
+    const existingStatus = (existing.status || "active").toLowerCase().trim()
+    if (targetStatus !== existingStatus) {
+      statusChanged++
+      statusReportLines.push(`${row.title} | ${existing._id} | planilha: ${targetStatus} | sanity: ${existingStatus}`)
+    }
+
+    const rowParsed = {
+      title: row.title,
+      brand: row.brand || null,
+      description: row.description || null,
+      descriptionHTML: row.descriptionHTML?.trim() || (row.description ? `<p>${row.description}</p>` : null),
+      status: targetStatus,
+      ean: row.ean || null,
+      reference: row.reference || null,
+      dimensions: row.dimensions || null,
+      warranty: row.warranty || null,
+      weight: row.weight || null,
+      stock: row.stock ? parseInt(row.stock, 10) || 0 : 0,
+      availability: row.availability || null,
+      whatsappMessage: row.whatsappMessage || null,
+      externalImages: parseExternalImages(row.externalImages, row.title),
+      categories: normalizeToArray(row.categories),
+      segments: normalizeToArray(row.segments),
+    }
+
+    const existingParsed = {
+      title: existing.title,
+      brand: existing.brand || null,
+      description: existing.description || null,
+      descriptionHTML: existing.descriptionHTML || null,
+      status: existing.status || "active",
+      ean: existing.ean || null,
+      reference: existing.reference || null,
+      dimensions: existing.dimensions || null,
+      warranty: existing.warranty || null,
+      weight: existing.weight || null,
+      stock: existing.stock || 0,
+      availability: existing.availability || null,
+      whatsappMessage: existing.whatsappMessage || null,
+      externalImages: existing.externalImages || [],
+      categories: existing.categories || [],
+      segments: existing.segments || [],
+    }
+
+    const diffs: { field: string; sheetVal: string; sanityVal: string }[] = []
+    for (const field of fieldsToCheck) {
+      const vSheet = normalizeValue((rowParsed as any)[field], field)
+      const vSanity = normalizeValue((existingParsed as any)[field], field)
+      if (vSheet !== vSanity) {
+        diffs.push({
+          field,
+          sheetVal: String(JSON.stringify((rowParsed as any)[field]) ?? "").slice(0, 60),
+          sanityVal: String(JSON.stringify((existingParsed as any)[field]) ?? "").slice(0, 60),
+        })
       }
-    } else {
-      // Linha com _id mas não encontrado
-      warnings.push(`⚠️ ID ${row._id} não encontrado no Sanity`)
+    }
+
+    if (diffs.length > 0) {
+      toUpdate++
+      updateReportItems.push({
+        title: row.title,
+        diffs,
+      })
     }
   }
 
@@ -179,6 +295,28 @@ async function syncSheet() {
   console.log(`   CRIAR: ${toCreate}`)
   console.log(`   ATUALIZAR: ${toUpdate}`)
   console.log(`   STATUS: ${statusChanged}`)
+
+  if (statusReportLines.length > 0) {
+    console.log(`\n📋 Relatório Completo de Mudanças de Status (${statusReportLines.length}):`)
+    for (const line of statusReportLines) {
+      console.log(`   ${line}`)
+    }
+  }
+
+  if (updateReportItems.length > 0) {
+    console.log(`\n📋 Relatório de Atualizações (Primeiros ${Math.min(5, updateReportItems.length)} de ${updateReportItems.length}):`)
+    for (let i = 0; i < Math.min(5, updateReportItems.length); i++) {
+      const item = updateReportItems[i]
+      const fieldsStr = item.diffs.map((d) => d.field).join(", ")
+      console.log(`   ${item.title} | campos: [${fieldsStr}]`)
+      for (const d of item.diffs) {
+        console.log(`      - ${d.field}: planilha = "${d.sheetVal}" vs sanity = "${d.sanityVal}"`)
+      }
+    }
+  } else {
+    console.log(`\n📋 Relatório de Atualizações: 0 produtos precisam de atualização (comparador idêntico).`)
+  }
+
   if (warnings.length > 0) {
     console.log(`   AVISOS:`)
     for (const w of warnings) console.log(`     ${w}`)
@@ -232,12 +370,10 @@ async function syncSheet() {
           ? row.status?.toLowerCase().trim()
           : "active"
 
-      // descriptionHTML: use from CSV; fallback: wrap description in <p>
       const descriptionHTML =
         row.descriptionHTML?.trim() ||
         (row.description ? `<p>${row.description}</p>` : null)
 
-      // externalImages: parse pipe-separated URLs
       const externalImages = parseExternalImages(row.externalImages, row.title)
 
       const payload = {
@@ -262,106 +398,110 @@ async function syncSheet() {
         segments: segmentsRefs,
       }
 
-      console.log(`\n📦 Payload para criar "${row.title}":`)
-      console.log(JSON.stringify(payload, null, 2))
-
       const created = await client.create(payload)
       console.log(`✅ ${row.title} -> _id: ${created._id}`)
     } catch (error: any) {
       console.error(`\n❌ Erro ao criar "${row.title}"`)
       console.error(`   _id tentado: ${docId}`)
       console.error(`   Erro: ${error.message || error}`)
-      if (error.details) console.error(`   Detalhes:`, JSON.stringify(error.details, null, 2))
-      if (error.response) console.error(`   Response:`, JSON.stringify(error.response, null, 2))
     }
   }
 
   // Atualizar produtos existentes
   for (const row of products) {
-    if (!row._id || !row.title) continue
+    if (!row.title) continue
 
-    const existing = sanityMap.get(row.title.toLowerCase().trim())
+    let existing = null
+    if (row._id) {
+      existing = sanityProducts.find((p: any) => p._id === row._id)
+    }
+    if (!existing) {
+      existing = sanityMap.get(row.title.toLowerCase().trim())
+    }
     if (!existing) continue
 
     try {
-      const patch: Record<string, any> = {}
+      const normalizedStatus = (row.status || "").toLowerCase().trim()
+      const targetStatus =
+        normalizedStatus === "inactive" || normalizedStatus === "inativo"
+          ? "discontinued"
+          : ["active", "draft", "discontinued"].includes(normalizedStatus)
+          ? normalizedStatus
+          : "active"
 
-      if (row.title !== existing.title) patch.title = row.title
-      if (row.brand !== existing.brand) patch.brand = row.brand || null
-      if (row.description !== existing.description) patch.description = row.description || null
-      if (row.status !== undefined && row.status !== null) {
-        const normalizedStatus = row.status.toLowerCase().trim()
-        const targetStatus =
-          normalizedStatus === "inactive" || normalizedStatus === "inativo"
-            ? "discontinued"
-            : normalizedStatus === "active" || normalizedStatus === "draft" || normalizedStatus === "discontinued"
-            ? normalizedStatus
-            : "active"
-        if (targetStatus !== existing.status) patch.status = targetStatus
-      }
-      if (row.ean !== existing.ean) patch.ean = row.ean || null
-      if (row.reference !== existing.reference) patch.reference = row.reference || null
-      if (row.dimensions !== existing.dimensions) patch.dimensions = row.dimensions || null
-      if (row.warranty !== existing.warranty) patch.warranty = row.warranty || null
-      if (row.weight !== existing.weight) patch.weight = row.weight || null
-      if (row.stock !== existing.stock) patch.stock = row.stock ? parseInt(row.stock) || 0 : 0
-      if (row.availability !== existing.availability) patch.availability = row.availability || null
-      if (row.whatsappMessage !== existing.whatsappMessage)
-        patch.whatsappMessage = row.whatsappMessage || null
-
-      // descriptionHTML: use from CSV; fallback: wrap description in <p>
-      const newDescriptionHTML =
-        row.descriptionHTML?.trim() ||
-        (row.description ? `<p>${row.description}</p>` : null)
-      if ((newDescriptionHTML || null) !== (existing.descriptionHTML || null)) {
-        patch.descriptionHTML = newDescriptionHTML || null
-      }
-
-      // externalImages: parse pipe-separated URLs
-      const newExternalImages = parseExternalImages(row.externalImages, row.title)
-      const existingExtUrls = (existing.externalImages || []).map((e: any) => e.url).join("|")
-      const newExtUrls = newExternalImages.map((e) => e.url).join("|")
-      if (newExtUrls !== existingExtUrls) {
-        patch.externalImages = newExternalImages
-      }
-
-      // Categorias
       const categoriesRefs = normalizeToArray(row.categories)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = categoryMap.get(c.trim().toLowerCase())
-          if (!ref) {
-            warnings.push(`⚠️ Categoria '${c}' não encontrada para '${row.title}'`)
-            return null
-          }
-          return { _type: "reference", _ref: ref }
+          return ref ? { _type: "reference", _ref: ref } : null
         })
         .filter(Boolean)
 
-      if (JSON.stringify(categoriesRefs) !== JSON.stringify(existing.categories)) {
-        patch.categories = categoriesRefs
-      }
-
-      // Segmentos
       const segmentsRefs = normalizeToArray(row.segments)
         .filter((c) => c.trim())
         .map((c) => {
           const ref = segmentMap.get(c.trim().toLowerCase())
-          if (!ref) {
-            warnings.push(`⚠️ Segmento '${c}' não encontrado para '${row.title}'`)
-            return null
-          }
-          return { _type: "reference", _ref: ref }
+          return ref ? { _type: "reference", _ref: ref } : null
         })
         .filter(Boolean)
 
-      if (JSON.stringify(segmentsRefs) !== JSON.stringify(existing.segments)) {
-        patch.segments = segmentsRefs
+      const rowParsed = {
+        title: row.title,
+        brand: row.brand || null,
+        description: row.description || null,
+        descriptionHTML: row.descriptionHTML?.trim() || (row.description ? `<p>${row.description}</p>` : null),
+        status: targetStatus,
+        ean: row.ean || null,
+        reference: row.reference || null,
+        dimensions: row.dimensions || null,
+        warranty: row.warranty || null,
+        weight: row.weight || null,
+        stock: row.stock ? parseInt(row.stock, 10) || 0 : 0,
+        availability: row.availability || null,
+        whatsappMessage: row.whatsappMessage || null,
+        externalImages: parseExternalImages(row.externalImages, row.title),
+        categories: normalizeToArray(row.categories),
+        segments: normalizeToArray(row.segments),
+      }
+
+      const existingParsed = {
+        title: existing.title,
+        brand: existing.brand || null,
+        description: existing.description || null,
+        descriptionHTML: existing.descriptionHTML || null,
+        status: existing.status || "active",
+        ean: existing.ean || null,
+        reference: existing.reference || null,
+        dimensions: existing.dimensions || null,
+        warranty: existing.warranty || null,
+        weight: existing.weight || null,
+        stock: existing.stock || 0,
+        availability: existing.availability || null,
+        whatsappMessage: existing.whatsappMessage || null,
+        externalImages: existing.externalImages || [],
+        categories: existing.categories || [],
+        segments: existing.segments || [],
+      }
+
+      const patch: Record<string, any> = {}
+
+      for (const field of fieldsToCheck) {
+        const vSheet = normalizeValue((rowParsed as any)[field], field)
+        const vSanity = normalizeValue((existingParsed as any)[field], field)
+        if (vSheet !== vSanity) {
+          if (field === "categories") {
+            patch.categories = categoriesRefs
+          } else if (field === "segments") {
+            patch.segments = segmentsRefs
+          } else {
+            patch[field] = (rowParsed as any)[field]
+          }
+        }
       }
 
       if (Object.keys(patch).length > 0) {
         await client.patch(existing._id).set(patch).commit()
-        console.log(`✅ Atualizado: ${row.title}`)
+        console.log(`✅ Atualizado: ${row.title} (campos: ${Object.keys(patch).join(", ")})`)
       }
     } catch (error) {
       console.error(`❌ Erro ao atualizar ${row.title}:`, error)
