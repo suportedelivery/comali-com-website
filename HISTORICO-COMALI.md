@@ -1,5 +1,5 @@
 # HISTÓRICO DO PROJETO COMALI — comali.com.br
-Última atualização: 09/09/2026 · Mantido por Edmar + Qwen
+Última atualização: 21/09/2026 · Mantido por Edmar + Qwen
 
 ## 1. ESTADO ATUAL (RESUMO)
 - Site de PRODUÇÃO (comali.com.br) rodando o MODELO 1 (branch master), merge feito em 08/09/2026.
@@ -31,6 +31,7 @@
 - 08/09: CRISE: projeto PAUSADO por cota (site fora do ar em plena campanha ADS) → upgrade Pro → site restaurado.
 - 08/09: merge modelo1 → master (stash prévio de arquivos de ferramentas locais: .claude-flow, .swarm, ruvector.db); site novo no ar.
 - 08-09/09: export CSV mestre (445 publicados; 8 drafts excluídos; escape CSV corrigido); Google Sheet CATÁLOGO; Webapp Apps Script v1 no ar; descoberta dos valores de status (active/draft/discontinued); formulário de pedido com upload de foto + link.
+- 21/09: extração de imagem em alta resolução em `Código.gs` (JSON-LD, og:image, img tags, heurística anti-thumbnail, checagem binária PNG/JPEG >= 800px, menu Apps Script reextrairImagem) + melhorias no `scripts/sync-sheet.ts` (relatório detalhado de status/updates e comparador normalizado).
 
 ## 5. DECISÕES TÉCNICAS IMPORTANTES
 - Menu superior: Modelo 1 = Sanity siteNavigation + 2 links hardcoded (Food Service, Nutricionistas); produção preservada com 4 itens originais até o merge.

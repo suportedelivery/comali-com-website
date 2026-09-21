@@ -485,6 +485,23 @@ Depois de adicionar ao `~/.bashrc`, use `source ~/.bashrc` e pronto — só digi
 
 ---
 
+## Session Log (2026-09-21) — Alta Resolução em Código.gs + Sync Comparador Normalizado
+
+### Mudanças Feitas
+1. **`Código.gs` (Extração em Alta Resolução)**:
+   - Coleta de candidatas (JSON-LD `Product`, `og:image` com peso por dimensões, tags `<img>` relevantes, fallbacks).
+   - Heurística anti-thumbnail (`_thumb` -> `_large`, `100x100` -> `1000x1000`, remoção de sufixos).
+   - Parsing binário direto do cabeçalho PNG (IHDR) e JPEG (SOF0-SOF15) via `UrlFetchApp` para garantir largura >= 800px.
+   - Item no menu COMALI: *"Re-extrair imagem do fabricante (linha selecionada)"* (`reextrairImagem()`), sincronizando a aba `CATÁLOGO`.
+   - Mensagem de alerta reportando a resolução escolhida.
+
+2. **`scripts/sync-sheet.ts` (Relatório Detalhado + Comparador)**:
+   - Impressão detalhada das mudanças de status no dry-run (`title | _id | planilha: X | sanity: Y`).
+   - Exibição das primeiras 5 atualizações com campos e valores truncados a 60 caracteres.
+   - Comparador normalizado (trim, null/empty igualados, arrays ordenados, `descriptionHTML` sem quebras/espaços duplicados, desconsiderando metadados Sanity).
+
+---
+
 ## Session Log (2026-08-11) — Consolidação de Produtos Duplicados (490 → 404)
 
 ### Problema
