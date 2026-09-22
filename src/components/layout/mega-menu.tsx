@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { ChevronDown, ChevronRight, Grid3X3 } from "lucide-react"
@@ -30,52 +30,81 @@ interface MegaMenuProps {
 
 export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const [hoverTimeout, setHoverTimeout] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
+  const closeMenu = useCallback(() => {
+    setActiveCategory(null)
+  }, [])
+
+  // (d) Fechar ao mudar de rota
   useEffect(() => {
     setActiveCategory(null)
   }, [pathname])
 
-  const handleMouseEnter = (slug: string) => {
-    if (hoverTimeout) clearTimeout(hoverTimeout)
-    setActiveCategory(slug)
-  }
+  // (a) Fechar ao rolar a página
+  useEffect(() => {
+    if (!activeCategory) return
+    const onScroll = () => closeMenu()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [activeCategory, closeMenu])
 
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setActiveCategory(null)
-    }, 150)
-    setHoverTimeout(timeout)
+  // (c) Fechar ao teclar Esc
+  useEffect(() => {
+    if (!activeCategory) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu()
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [activeCategory, closeMenu])
+
+  // (b) Fechar ao clicar fora
+  useEffect(() => {
+    if (!activeCategory) return
+    const onPointerDown = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        closeMenu()
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [activeCategory, closeMenu])
+
+  const toggleCategory = (slug: string) => {
+    setActiveCategory((prev) => (prev === slug ? null : slug))
   }
 
   const activeCat = categories.find((c) => c.slug === activeCategory)
   const activeProducts = activeCategory ? productsByCategory[activeCategory] || [] : []
 
   return (
-    <div className="relative" onMouseLeave={handleMouseLeave}>
+    <div className="relative" ref={containerRef}>
       <nav className="flex items-center gap-0 bg-slate-200">
-        {categories.map((category) => (
-          <Link
-            key={category.slug}
-            href={`/produtos/${category.slug}`}
-            className={`flex items-center gap-1 px-4 py-3 text-base font-extrabold uppercase tracking-wide transition-colors ${
-              activeCategory === category.slug
-                ? "text-white bg-slate-900"
-                : "text-slate-900 hover:bg-slate-900 hover:text-white"
-            }`}
-            onMouseEnter={() => handleMouseEnter(category.slug)}
-          >
-            {category.name}
-            {category.subcategories.length > 0 && (
+        {categories.map((category) => {
+          const isOpen = activeCategory === category.slug
+          return (
+            <button
+              key={category.slug}
+              type="button"
+              onClick={() => toggleCategory(category.slug)}
+              aria-expanded={isOpen}
+              aria-controls={`mega-menu-panel-${category.slug}`}
+              className={`flex items-center gap-1 px-4 py-3 text-base font-extrabold uppercase tracking-wide transition-colors ${
+                isOpen
+                  ? "text-white bg-slate-900"
+                  : "text-slate-900 hover:bg-slate-900 hover:text-white"
+              }`}
+            >
+              {category.name}
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  activeCategory === category.slug ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
               />
-            )}
-          </Link>
-        ))}
+            </button>
+          )
+        })}
         <a
           href="/segmentos"
           className="flex items-center gap-1.5 px-4 py-3 text-base font-extrabold uppercase tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ml-auto"
@@ -87,10 +116,10 @@ export function MegaMenu({ categories, productsByCategory }: MegaMenuProps) {
 
       {activeCat && (
         <div
+          id={`mega-menu-panel-${activeCat.slug}`}
+          role="region"
+          aria-label={`Menu ${activeCat.name}`}
           className="absolute top-full left-0 w-full bg-cyan-50 shadow-xl border-t border-cyan-200 z-50"
-          onMouseEnter={() => {
-            if (hoverTimeout) clearTimeout(hoverTimeout)
-          }}
         >
           <div className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
