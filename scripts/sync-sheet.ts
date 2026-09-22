@@ -49,13 +49,47 @@ function slugify(text: string): string {
 }
 
 function normalizeToArray(v: any): string[] {
-  if (!v) return []
-  if (Array.isArray(v)) return v
-  if (typeof v === "string")
+  if (v === null || v === undefined) return []
+  if (typeof v === "string") {
+    const s = v.trim()
+    if (!s || s.toLowerCase() === "null" || s.toLowerCase() === "undefined") return []
+    return s
+      .split("|")
+      .map((x) => x.trim())
+      .filter((x) => x && x.toLowerCase() !== "null" && x.toLowerCase() !== "undefined")
+  }
+  if (Array.isArray(v)) {
     return v
+      .map((x) => (typeof x === "string" ? x.trim() : x))
+      .filter(
+        (x): x is string =>
+          typeof x === "string" &&
+          x.length > 0 &&
+          x.toLowerCase() !== "null" &&
+          x.toLowerCase() !== "undefined"
+      )
+  }
+  return []
+}
+
+/** Compara externalImages apenas pelas URLs, na ordem (ignora _type/_key/alt). */
+function extractExternalImageUrls(val: any): string[] {
+  if (!val) return []
+  if (typeof val === "string") {
+    return val
       .split("|")
       .map((s) => s.trim())
       .filter(Boolean)
+  }
+  if (Array.isArray(val)) {
+    return val
+      .map((item) => {
+        if (typeof item === "string") return item.trim()
+        if (item && typeof item === "object" && typeof item.url === "string") return item.url.trim()
+        return ""
+      })
+      .filter(Boolean)
+  }
   return []
 }
 
@@ -75,6 +109,16 @@ function parseExternalImages(pipeSeparated: string | null | undefined, title: st
 
 function normalizeValue(val: any, fieldName: string): any {
   if (val === null || val === undefined || val === "") return ""
+
+  // externalImages: comparar SOMENTE a lista ordenada de URLs
+  if (fieldName === "externalImages") {
+    return JSON.stringify(extractExternalImageUrls(val))
+  }
+
+  // categories/segments: "null"/"undefined"/vazio => lista vazia; split por "|"
+  if (fieldName === "categories" || fieldName === "segments") {
+    return JSON.stringify(normalizeToArray(val).map((s) => s.toLowerCase()))
+  }
 
   if (fieldName === "status") {
     return String(val).toLowerCase().trim()
