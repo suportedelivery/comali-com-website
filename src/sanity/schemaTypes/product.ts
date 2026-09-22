@@ -17,9 +17,20 @@ export default defineType({
       type: "slug",
       options: {
         source: "title",
-        maxLength: 96,
+        maxLength: 100,
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().custom((value) => {
+          const current = (value as { current?: string } | undefined)?.current
+          if (!current) return true
+          if (current.startsWith("/")) {
+            return "Slug não pode começar com /"
+          }
+          if (current === "produtos" || current.startsWith("produtos/")) {
+            return "Slug não pode começar com 'produtos'"
+          }
+          return true
+        }),
     }),
     defineField({
       name: "status",

@@ -73,19 +73,14 @@ export async function generateStaticParams() {
     }
   }
 
-  // Product detail pages
+  // Product detail pages: /produtos/{primeira-categoria}/{slug} (fallback: /produtos/outros/{slug})
   for (const p of allProds) {
     const mainCat = (p as any).categories?.[0]
-    const parentSlug = mainCat?.parent || mainCat?.parentCategory?.slug?.current
-    const catSlug = mainCat?.slug?.current || mainCat?.slug || "produtos"
+    const catSlug = mainCat?.slug?.current || mainCat?.slug || "outros"
     const pSlug = p.slug?.current || (p as any).slug || ""
 
     if (pSlug) {
-      if (parentSlug) {
-        params.push({ slug: [parentSlug, catSlug, pSlug] })
-      } else {
-        params.push({ slug: [catSlug, pSlug] })
-      }
+      params.push({ slug: [catSlug, pSlug] })
     }
   }
 

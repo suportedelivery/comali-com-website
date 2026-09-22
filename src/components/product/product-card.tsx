@@ -47,14 +47,12 @@ export function ProductCard({ product, currentCategorySlug }: ProductCardProps) 
     || product.categories?.find((c: any) => getParentSlug(c))
     || product.categories?.[0] as any
 
-  const parentSlug = getParentSlug(subCat)
-  const categorySlug = getCatSlug(subCat) || "produtos"
   const productSlug = product.slug?.current || (product.slug as any) || ""
   const categoryName = subCat?.title || subCat?.name
 
-  const linkHref = parentSlug
-    ? `/produtos/${parentSlug}/${categorySlug}/${productSlug}`
-    : `/produtos/${categorySlug}/${productSlug}`
+  // URL canônica: /produtos/{primeira-categoria}/{slug} (fallback: /produtos/outros/{slug})
+  const firstCatSlug = getCatSlug(product.categories?.[0] as any) || "outros"
+  const linkHref = `/produtos/${firstCatSlug}/${productSlug}`
 
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg border border-gray-200 hover:border-gray-300 bg-white">
