@@ -32,6 +32,7 @@ interface ImportedProduct {
   featured: boolean
   new: boolean
   active: boolean
+  status: string
   sortOrder: number
   variations: Array<{
     id: string
@@ -107,6 +108,7 @@ function mapSanityProduct(p: any): ImportedProduct {
     featured: p.featured ?? false,
     new: p.new ?? false,
     active: p.status === "active",
+    status: p.status || "active",
     sortOrder: p.sortOrder ?? 0,
     variations: (p.variations || []).map((v: any) => ({
       id: v.id || v._key || "",

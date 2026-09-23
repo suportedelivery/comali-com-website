@@ -3,7 +3,24 @@ import { getProductBySlug as getProductDetails } from "@/lib/products"
 
 export const revalidate = 1800
 import { ProductCard } from "@/components/product/product-card"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
+
+// Mesmo formato de URL de categoria usado no site (mega-menu/sitemap):
+// raiz => /produtos/{slug}; subcategoria com pai => /produtos/{pai}/{slug}
+function categoryHref(cat: { slug: string; parent?: string }): string {
+  return cat.parent ? `/produtos/${cat.parent}/${cat.slug}` : `/produtos/${cat.slug}`
+}
+
+// Produtos descontinuados/rascunho: redireciona (307) para a primeira categoria
+// (ou /produtos se não tiver categoria) — protege URLs de ADS de 404.
+function redirectIfUnavailable(product: {
+  status?: string
+  categories?: Array<{ slug: string; parent?: string }>
+}): void {
+  if (product.status !== "discontinued" && product.status !== "draft") return
+  const firstCat = product.categories?.[0]
+  redirect(firstCat?.slug ? categoryHref(firstCat) : "/produtos")
+}
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -242,6 +259,7 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
       // Check if segment2 matches a product slug
       const productDetail = await getProductDetails(segment2)
       if (productDetail) {
+        redirectIfUnavailable(productDetail)
         const parentCategoryName = segment1.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())
         return (
           <div className="container mx-auto px-4 py-12 bg-gray-50 min-h-screen">
@@ -350,6 +368,7 @@ export default async function DynamicProductsRoute({ params }: DynamicProductsRo
     const [segment1, segment2, productSlug] = slug
     const productDetail = await getProductDetails(productSlug)
     if (!productDetail) notFound()
+    redirectIfUnavailable(productDetail)
 
     const parentCategoryName = segment1.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())
     const subcategoryName = segment2.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())
