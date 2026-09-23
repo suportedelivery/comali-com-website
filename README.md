@@ -1,3 +1,5 @@
+> **[MANUAL-OPERACAO.md](MANUAL-OPERACAO.md)** — Manual de operação do catálogo (fluxo completo, regras, sync, webapp, lições da homologação 2026-09-23). Ver também [HISTORICO-COMALI.md](HISTORICO-COMALI.md) e [COMANDOS.md](COMANDOS.md).
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

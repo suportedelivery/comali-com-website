@@ -1,5 +1,7 @@
 # HISTÓRICO DO PROJETO COMALI — comali.com.br
-Última atualização: 21/09/2026 · Mantido por Edmar + Qwen
+Última atualização: 23/09/2026 · Mantido por Edmar + Qwen
+
+> **Novo:** [MANUAL-OPERACAO.md](MANUAL-OPERACAO.md) — operação consolidada do catálogo + lições da homologação.
 
 ## 1. ESTADO ATUAL (RESUMO)
 - Site de PRODUÇÃO (comali.com.br) rodando o MODELO 1 (branch master), merge feito em 08/09/2026.
@@ -52,3 +54,43 @@ Edmar: revisa PEDIDOS → completa linha nova na aba CATÁLOGO (sem _id) → rod
 
 ## 8. PARA SESSÕES DE IA (Qwen/OpenCode/ruflo)
 Ao retomar: leia este arquivo + git status + git branch. Comandos úteis: npx tsx scripts/export-products-csv.ts (regenera CSV mestre). Nunca commitar sem typecheck. Merge sempre com --no-ff e backup prévio.
+
+---
+
+## 9. 2026-09-23: Homologação completa
+
+### O que foi homologado
+- Fluxo ponta a ponta: pedido webapp → aprovação menu COMALI → download CSV → `sync-sheet.ts` (dry-run → `--apply`) → site ≤30 min (ISR 1800s).
+- Criação de produtos novos e atualização de status/ATIVAR-DESCONTINUAR pela planilha.
+- Extração de imagem em alta resolução via menu COMALI ("Re-extrair imagem do fabricante").
+- Redirect temporário de descontinuados (307) para proteger campanhas ADS.
+- Relatório de sync detalhado + comparador normalizado (`scripts/sync-log-2026-09-23.txt`: 454 linhas / 456 ativos / CRIAR 0 / ATUALIZAR 5 / STATUS 0 / AVISOS 0).
+- Manual de operação consolidado: `MANUAL-OPERACAO.md`.
+
+### Lições (não estavam documentadas antes)
+1. Nome oficial do fabricante: copiar da página, não resumir. Certo: "Papel Toalha Rolo Ripz 200m com 6 Rolos de 28G". Errado: "Papel Toalha Bobina".
+2. Nomes iguais = `_id` igual = colisão "already exists". Diferenciar com medida/gramatura (28g vs 24g, 20x20 vs 22x20).
+3. Categorias no formato "Raiz | Sub | Sub-sub" (pipe). 1º item define a URL; demais listagens. Ex.: "Dispensers | Papel Toalha Interfolhado".
+4. Dropdown de categorias no pedido (webapp) evita erro humano; categoria principal obrigatória.
+5. `_id` é chave primária: sem `_id` = novo; com `_id` = existente. Nunca re-aprovar pedido de produto que já tem `_id` (duplica).
+6. Atualizar foto de existente: menu COMALI → "Re-extrair imagem do fabricante" (não re-aprovar).
+7. Delete é sempre manual e nos DOIS lados (Sanity + planilha). Sync nunca deleta.
+8. Aba MUDANÇAS = fonte da verdade para divergências de STATUS no dry-run (antigo→novo).
+9. Redirect de descontinuados é temporário (302/307), não 301; destino = 1ª categoria, fallback `/produtos`; protege ADS de 404.
+10. Baixar CSV novo da aba CATÁLOGO antes de cada sync (sync lê o arquivo, não a aba ao vivo).
+11. `--apply` só com relatório revisado; STATUS>0 ou ATUALIZAR>0 exige conferência.
+12. Apps Script = colar arquivo inteiro + Implantar nova versão; OpenCode = git push. Nunca editar Apps Script às cegas.
+13. Erro no webapp: ver Execuções (relógio) no editor Apps Script; console do navegador não mostra erros do servidor.
+
+### Problemas resolvidos
+- URLs duplicadas `/produtos/produtos` (corrigido em `3cdc637` — slugs + hierarquia de categoria).
+- Thumbnails em baixa resolução (extração prioriza ≥800px / heurística anti-thumbnail; commit `fbe47ea`).
+- Categoria `/outros` indevida / strings de categoria mal formadas no sync.
+- Colisões de `_id` por nomes genéricos iguais.
+- Lixo de teste "Teste Avancado" removido do catálogo.
+- Redirect 307 de descontinuados para não quebrar anúncios (`dca7da7`).
+
+### Pendências — fase 2
+1. Categorias faltantes no dropdown/planilha (ex.: **Caicai**).
+2. Auto-sugestão de nome oficial do produto a partir do link do fabricante no webapp.
+3. Sync: resolver linhas **sem** `_id` por nome/slug canônico (evitar "already exists" quando o produto já existe com outro `_id`).
