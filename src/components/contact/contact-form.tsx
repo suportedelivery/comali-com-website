@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { siteConfig } from "@/lib/config"
+import { trackEvent, trackWhatsappClick } from "@/lib/whatsapp"
 
 export function ContactForm() {
   const [name, setName] = useState("")
@@ -23,6 +24,14 @@ export function ContactForm() {
 `*Empresa:* ${company || "Não informado"}`,
 `*Mensagem:* ${message || "Não informado"}`,
     ].join("%0A")
+
+    // Rastreamento de conversão (GTM/GA4). Sem PII: só metadados de contexto.
+    trackEvent("form_submitted", {
+      form_type: "contact",
+      has_company: company.trim().length > 0,
+      message_length: message.trim().length,
+    })
+    trackWhatsappClick("contato_form", { form_type: "contact" })
 
     window.open(`https://wa.me/${siteConfig.whatsapp.number}?text=${text}`, "_blank")
   }
