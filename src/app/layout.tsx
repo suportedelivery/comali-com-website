@@ -10,12 +10,18 @@ import { siteConfig } from "@/lib/config"
 
 const GTM_ID = "GTM-M9HHG8"
 /**
- * GA4 — propriedade "Comali" (fluxo Web "Comali").
- * Instalado direto no código porque o container GTM-M9HHG8 não tem tag de GA4.
+ * GA4 — propriedade "Comali - Site" (fluxo Web "Site Comali"), criada em 2026-10-21
+ * especificamente para o site atual (Next.js na Vercel).
+ *
+ * A propriedade anterior (G-MYC4NDN968) foi descartada: recebia eventos de outra
+ * origem (view_item / view_item_list do site antigo da Tray) e não registrava os
+ * eventos deste site.
+ *
+ * Instalado direto no código porque o container GTM-M9HHG8 não possui tag de GA4.
  * Os eventos whatsapp_click / form_submitted de src/lib/whatsapp.ts já empurram
  * para o dataLayer e chamam window.gtag, então são capturados por este snippet.
  */
-const GA4_ID = "G-MYC4NDN968"
+const GA4_ID = "G-DKFW3FKVB1"
 
 const inter = Inter({
   variable: "--font-sans",
