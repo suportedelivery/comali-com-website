@@ -45,9 +45,27 @@ function normalizeParams(extra: Record<string, unknown> = {}) {
 }
 
 /**
- * Dispara evento de conversão WhatsApp no GTM/GA4.
+ * Rótulo da ação de conversão "Contato" no Google Ads (conta 822-541-7886).
+ * Criada em 2026-10-22 como evento manual, disparo por clique.
+ */
+const ADS_CONVERSION_SEND_TO = "AW-594461862/6L9YCISY9aUDcKaJu5sc"
+
+/**
+ * Envia a conversão para o Google Ads.
+ * Não envia valor: a ação foi criada sem valor atribuído.
+ */
+function trackAdsConversion() {
+  if (typeof window === "undefined") return
+  const w = window as unknown as { gtag?: (...args: unknown[]) => void }
+  if (typeof w.gtag !== "function") return
+  w.gtag("event", "conversion", { send_to: ADS_CONVERSION_SEND_TO })
+}
+
+/**
+ * Dispara evento de conversão WhatsApp no GTM/GA4 e a conversão no Google Ads.
  * @param source origem do clique (ex: "product_card", "contato_form")
  */
 export function trackWhatsappClick(source: string, extra?: Record<string, unknown>) {
   trackEvent("whatsapp_click", { whatsapp_source: source, ...normalizeParams(extra) })
+  trackAdsConversion()
 }
